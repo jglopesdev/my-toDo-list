@@ -8,10 +8,11 @@ Aplicação web de gerenciamento de tarefas com prioridades, filtros, busca e ba
 - **Editar**: Clique duas vezes no texto da tarefa
 - **Concluir**: Marque o checkbox
 - **Prioridades**: Classifique como Crítica (C), Alta (A), Média (M), Baixa (B)
-- **Imagens**: Arraste/cole imagens (Ctrl+V ou drag & drop)
-- **Buscar**: Ctrl+B para abrir a barra de busca
+- **Imagens**: Arraste/cole imagens (Ctrl+V ou drag & drop) - botão + aparece na tarefa selecionada
+- **Buscar**: Ctrl+B para abrir a barra de busca com highlight de resultados
 - **Navegar**: Use as setas ↑↓ para mover entre tarefas
 - **Excluir**: Pressione DEL na tarefa selecionada, confirme com Enter ou E
+- **Excluir Todas**: Botão no rodapé (desktop only) com confirmação segura
 - **Tema**: Clique no ícone ☀️/🌙 para alternar entre tema claro e escuro
 
 ## Atalhos de Teclado
@@ -37,6 +38,7 @@ Aplicação web de gerenciamento de tarefas com prioridades, filtros, busca e ba
 - Imagens são compactadas automaticamente (max 500x500px, 60% qualidade)
 - Máximo de 5 imagens por tarefa
 - Ao atingir o limite, será notificado para remover imagens/tarefas antigas
+- Modal pede confirmação digitando "tenho certeza" para excluir todas as tarefas
 
 ## Formato do Arquivo TXT
 
