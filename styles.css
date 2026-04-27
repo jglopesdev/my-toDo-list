@@ -739,7 +739,101 @@ body {
   .app {
     padding: var(--spacing-md);
     max-width: 95%;
+    padding-bottom: 180px;
   }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .theme-toggle {
+    font-size: 1.3rem;
+  }
+
+  .counters {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .counter {
+    font-size: 0.75rem;
+    padding: 4px 6px;
+  }
+
+  .task-item {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+
+  .task-text {
+    font-size: 0.95rem;
+  }
+
+  .task-checkbox {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+
+  .task-priority {
+    margin-left: auto;
+  }
+
+  .task-priority-btn {
+    padding: 2px 4px;
+    font-size: 0.6rem;
+  }
+
+  .drag-handle {
+    font-size: 0.9rem;
+  }
+
+  .task-actions {
+    opacity: 1;
+  }
+
+  .task-image {
+    max-width: 100px;
+    max-height: 70px;
+  }
+
+  .footer {
+    padding: var(--spacing-sm);
+  }
+
+  .footer-top {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-sm);
+  }
+
+  .btn-export {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .shortcuts {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.65rem;
+  }
+
+  .search-bar {
+    top: 10px;
+    max-width: 95%;
+  }
+
+  .search-input {
+    padding: 10px 38px 10px 36px;
+    font-size: 0.9rem;
+  }
+
+  .task-input {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}
 
   .title {
     font-size: 1.5rem;
@@ -760,28 +854,28 @@ body {
   position: relative;
 }
 
-.task-images-container .added-img-btn {
-  margin-left: auto !important;
-  align-self: flex-start;
-  flex-shrink: 0;
-}
-
-.btn-add-image[data-added="true"] {
-  width: 44px !important;
-  height: 44px !important;
-  min-width: 44px !important;
-  background: transparent !important;
-  border: 2px dashed #444 !important;
-  border-radius: 8px !important;
-  color: #666 !important;
-  font-size: 24px !important;
-  font-weight: bold !important;
+.btn-add-image {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  line-height: 1;
+  padding: 0;
+}
+
+.btn-add-image:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
   padding: 0;
   box-sizing: border-box;
   margin-left: 4px;
@@ -904,16 +998,4 @@ body {
 
 .task-item.search-highlight {
   box-shadow: 0 0 0 2px var(--primary);
-}
-
-@media (max-width: 480px) {
-  .search-bar {
-    top: 10px;
-    max-width: 95%;
-  }
-
-  .search-input {
-    padding: 12px 42px 12px 40px;
-    font-size: 0.9rem;
-  }
 }

@@ -5,6 +5,8 @@
   const MAX_IMAGE_SIZE = 500;
   const IMAGE_QUALITY = 0.6;
   const IMAGE_PLACEHOLDER = 'Detalhe a tarefa relacionada a esta imagem...';
+  const MAX_IMAGES_PER_TASK = 5;
+  const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB safety limit
 
 let tasks = [];
   let selectedId = null;
@@ -212,19 +214,19 @@ let tasks = [];
       const images = task.images.map((img, idx) => `
         <div class="task-image-wrapper">
           <img class="task-image" data-task-id="${task.id}" data-image-index="${idx}" src="${img}" alt="Anexo ${idx + 1}">
-          <button class="btn-delete-image" data-task-id="${task.id}" data-image-index="${idx}" title="Excluir imagem">&times;</button>
+          <button class="btn-delete-image" data-task-id="${task.id}" data-image-index="${idx}" title="Excluir imagem" aria-label="Excluir imagem">&times;</button>
         </div>
       `).join('');
-      const addBtn = `<button type="button" class="btn-add-image added-img-btn" data-task-id="${task.id}" title="Adicionar imagem" style="width:32px;height:32px;min-width:32px;background:transparent;border:2px dashed #555;border-radius:6px;color:#777;font-size:18px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;">+</button>`;
+      const addBtn = `<button type="button" class="btn-add-image" data-task-id="${task.id}" title="Adicionar imagem" aria-label="Adicionar imagem">+</button>`;
       imageHtml = `<div class="task-images-container">${images}${addBtn}</div>`;
     }
 
     const priorityButtons = `
-      <div class="task-priority" data-task-id="${task.id}">
-        <button class="task-priority-btn priority-critical ${task.priority === 'critical' ? 'active' : ''}" data-priority="critical" title="Crítica">C</button>
-        <button class="task-priority-btn priority-high ${task.priority === 'high' ? 'active' : ''}" data-priority="high" title="Alta">A</button>
-        <button class="task-priority-btn priority-medium ${task.priority === 'medium' ? 'active' : ''}" data-priority="medium" title="Média">M</button>
-        <button class="task-priority-btn priority-low ${task.priority === 'low' ? 'active' : ''}" data-priority="low" title="Baixa">B</button>
+      <div class="task-priority" data-task-id="${task.id}" role="group" aria-label="Prioridade">
+        <button class="task-priority-btn priority-critical ${task.priority === 'critical' ? 'active' : ''}" data-priority="critical" title="Crítica" aria-label="Definir prioridade crítica">C</button>
+        <button class="task-priority-btn priority-high ${task.priority === 'high' ? 'active' : ''}" data-priority="high" title="Alta" aria-label="Definir prioridade alta">A</button>
+        <button class="task-priority-btn priority-medium ${task.priority === 'medium' ? 'active' : ''}" data-priority="medium" title="Média" aria-label="Definir prioridade média">M</button>
+        <button class="task-priority-btn priority-low ${task.priority === 'low' ? 'active' : ''}" data-priority="low" title="Baixa" aria-label="Definir prioridade baixa">B</button>
       </div>
     `;
 
@@ -239,7 +241,7 @@ let tasks = [];
           </div>
           ${priorityButtons}
           <div class="task-actions">
-            <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir">&times;</button>
+            <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir" aria-label="Excluir tarefa">&times;</button>
           </div>
         </div>
       `;
@@ -255,7 +257,7 @@ let tasks = [];
         </div>
         ${priorityButtons}
         <div class="task-actions">
-          <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir">&times;</button>
+          <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir" aria-label="Excluir tarefa">&times;</button>
         </div>
       </div>
     `;
@@ -760,9 +762,17 @@ let tasks = [];
         const task = tasks.find(t => t.id === selectedId);
         if (task) {
           if (!task.images) task.images = [];
+          if (task.images.length >= MAX_IMAGES_PER_TASK) {
+            showToast(`Máximo de ${MAX_IMAGES_PER_TASK} imagens por tarefa`, 'warning');
+            return;
+          }
           task.images.push(base64);
           task.updatedAt = Date.now();
-          saveTasks();
+          if (!saveTasksSync()) {
+            task.images.pop();
+            showToast('Limite de armazenamento excedido.', 'error');
+            return;
+          }
           renderTasks();
           showToast('Imagem anexada à tarefa');
           return;
@@ -835,15 +845,19 @@ let tasks = [];
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       if (!task.images) task.images = [];
+      if (task.images.length >= MAX_IMAGES_PER_TASK) {
+        showToast(`Máximo de ${MAX_IMAGES_PER_TASK} imagens por tarefa`, 'warning');
+        return;
+      }
       task.images.push(base64);
       task.updatedAt = Date.now();
-      if (saveTasks()) {
-        renderTasks();
-        showToast('Imagem adicionada!', 'success');
-      } else {
+      if (!saveTasksSync()) {
         task.images.pop();
-        showToast('Limite de armazenamento excedido. Não é possível adicionar mais imagens.', 'error');
+        showToast('Limite de armazenamento excedido.', 'error');
+        return;
       }
+      renderTasks();
+      showToast('Imagem adicionada!', 'success');
     }
   }
 
