@@ -547,16 +547,6 @@ const elements = {
           setPriority(taskId, btn.dataset.priority);
         });
       });
-        });
-      }
-
-      const priorityBtns = item.querySelectorAll('.task-priority-btn');
-      priorityBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          setPriority(taskId, btn.dataset.priority);
-        });
-      });
 
       item.addEventListener('dragstart', (e) => {
         item.classList.add('dragging');
