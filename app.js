@@ -406,8 +406,7 @@ const elements = {
         <span class="${dragHandleClass}">⋮⋮</span>
         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
         <div class="task-content">
-          <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${isLongText ? `<span class="task-text-short" id="${longTextId}">${textToRender}</span><span class="task-text-full" id="${longTextId}-full" style="display:none">${linkedText}</span>` : textToRender}</div>
-          ${isLongText ? '<button class="btn-expand" data-task-id="' + task.id + '">Ver mais...</button>' : ''}
+          <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${isLongText ? `<span class="task-text-short" id="${longTextId}">${textToRender}</span><span class="task-text-full" id="${longTextId}-full" style="display:none">${linkedText}</span>` : textToRender}${isLongText ? '<button class="btn-expand" data-task-id="' + task.id + '">Ver mais</button>' : ''}</div>
           ${imageHtml}
         </div>
         ${priorityButtons}
@@ -529,7 +528,7 @@ const elements = {
             const isExpanded = fullEl.style.display !== 'none';
             shortEl.style.display = isExpanded ? '' : 'none';
             fullEl.style.display = isExpanded ? 'none' : '';
-            expandBtn.textContent = isExpanded ? 'Ver mais...' : 'Ver menos';
+            expandBtn.textContent = isExpanded ? 'Ver mais' : 'Ver menos';
           }
         });
       }
