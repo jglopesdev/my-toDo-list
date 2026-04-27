@@ -870,6 +870,12 @@ body {
   justify-content: center;
   transition: all 0.2s;
   padding: 0;
+  opacity: 0;
+}
+
+.task-item.selected .btn-add-image,
+.task-images-container:hover .btn-add-image {
+  opacity: 1;
 }
 
 .btn-add-image:hover {
