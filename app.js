@@ -70,6 +70,7 @@ const elements = {
   let toastUndoTimer = null;
   let isSoundEnabled = true;
   let deleteAllCountdownTimer = null;
+  let hasShownPriorityToast = false;
 
   function loadTasks() {
     try {
@@ -441,12 +442,14 @@ const elements = {
   function renderTaskSection(title, sectionTasks, isCompleted) {
     const itemsHtml = sectionTasks.map(task => renderTaskItem(task)).join('');
     const collapsed = isCompleted ? 'collapsed' : '';
+    const infoIcon = !isCompleted ? '<span class="section-info" data-tip="📌 Tarefas com prioridade s\u00e3o ordenadas automaticamente.\n\u2195 Apenas tarefas sem prioridade podem ser reorganizadas manualmente." title="Ordena\u00e7\u00e3o">i</span>' : '';
     return `
       <div class="task-section ${collapsed}" data-completed="${isCompleted}">
         <div class="task-section-header">
           <span class="section-arrow ${collapsed}">▼</span>
           <span class="section-title">${title}</span>
           <span class="section-count">${sectionTasks.length}</span>
+          ${infoIcon}
         </div>
         <div class="task-items">
           ${itemsHtml}
@@ -747,6 +750,7 @@ const elements = {
   function setPriority(taskId, priority) {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
+      const wasNone = task.priority === 'none';
       task.priority = task.priority === priority ? 'none' : priority;
       task.updatedAt = Date.now();
       saveTasks();
@@ -754,6 +758,12 @@ const elements = {
       const labels = { critical: 'Crítica', high: 'Alta', medium: 'Média', low: 'Baixa' };
       const types = { critical: 'error', high: 'warning', medium: 'info', low: 'success', none: 'info' };
       showToast(task.priority !== 'none' ? `Prioridade: ${labels[task.priority]}` : 'Prioridade removida', types[task.priority] || 'info');
+      if (wasNone && task.priority !== 'none' && !hasShownPriorityToast) {
+        hasShownPriorityToast = true;
+        setTimeout(() => {
+          showToast('🔔 Tarefas com prioridade s\u00e3o ordenadas automaticamente. Arraste apenas tarefas sem prioridade.', 'info');
+        }, 600);
+      }
     }
   }
 
@@ -1188,6 +1198,18 @@ const elements = {
       soundBtn.innerHTML = isSoundEnabled ? '🔊 Som' : '🔇 Som';
     });
     document.querySelector('.footer .shortcuts')?.appendChild(soundBtn);
+
+    // Help modal
+    const helpBtn = document.getElementById('helpBtn');
+    const helpModal = document.getElementById('helpModal');
+    const helpClose = document.getElementById('helpClose');
+    if (helpBtn && helpModal && helpClose) {
+      helpBtn.addEventListener('click', () => helpModal.classList.add('visible'));
+      helpClose.addEventListener('click', () => helpModal.classList.remove('visible'));
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) helpModal.classList.remove('visible');
+      });
+    }
 
     // Swipe to delete (mobile)
     let touchStartX = 0;
