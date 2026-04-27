@@ -888,13 +888,14 @@ let tasks = [];
   }
 
   function init() {
-    loadTasks();
-    renderTasks();
-
     elements.taskInput.addEventListener('keydown', addTaskByEnter);
     document.addEventListener('paste', handlePaste);
     document.addEventListener('dragover', (e) => e.preventDefault());
     document.addEventListener('drop', handleDrop);
+    elements.searchBar.style.display = 'none';
+    elements.searchBar.classList.remove('visible');
+    loadTasks();
+    renderTasks();
     document.addEventListener('click', (e) => {
       const clickedOnTask = e.target.closest('.task-item');
       const clickedOnInput = e.target === elements.taskInput;
@@ -1004,10 +1005,15 @@ let tasks = [];
       }
     });
     elements.searchClose.addEventListener('click', closeSearchBar);
+document.addEventListener('click', (e) => {
+      if (searchBarVisible && !e.target.closest('.search-bar') && e.target !== elements.searchInput) {
+        closeSearchBar();
+      }
+    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'b' && window.innerWidth > 480) {
+      if (e.ctrlKey && (e.key === 'b' || e.key === 'B') && window.innerWidth > 480) {
         e.preventDefault();
         toggleSearchBar();
       }
@@ -1048,7 +1054,7 @@ let tasks = [];
     showToast(`Filtrando: ${labels[filter] || filter}`, 'info');
   }
 
-  function toggleSearchBar() {
+function toggleSearchBar() {
     if (searchBarVisible) {
       closeSearchBar();
     } else {
@@ -1060,19 +1066,16 @@ let tasks = [];
     currentFilter = null;
     searchBarVisible = true;
     elements.searchBar.classList.add('visible');
-    elements.searchBar.style.display = '';
     elements.searchInput.value = '';
-    elements.searchInput.focus();
+    setTimeout(() => elements.searchInput.focus(), 50);
     renderTasks();
   }
 
   function closeSearchBar() {
     searchBarVisible = false;
     elements.searchBar.classList.remove('visible');
-    elements.searchBar.style.display = 'none';
     elements.searchInput.value = '';
-    elements.searchCount.textContent = '';
-    searchResults = [];
+    currentFilter = null;
     renderTasks();
   }
 
@@ -1151,31 +1154,9 @@ let tasks = [];
     }
   }
 
-  if (document.readyState === 'loading') {
+if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
-  
-  console.log('ToDoList initialized - CTRL+B para buscar, DEL para excluir');
-
-  function toggleTheme() {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
-    localStorage.setItem('todolist_theme', currentTheme);
-  }
-
-  function loadTheme() {
-    const saved = localStorage.getItem('todolist_theme');
-    if (saved === 'dark' || saved === 'light') {
-      currentTheme = saved;
-      document.documentElement.setAttribute('data-theme', currentTheme);
-      elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
-    }
-  }
-
-  loadTheme();
-
-  elements.themeToggle.addEventListener('click', toggleTheme);
 })();

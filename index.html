@@ -31,6 +31,14 @@
         placeholder="Digite uma nova tarefa..."
         autocomplete="off"
       >
+      <div class="search-bar" id="searchBar">
+        <div class="search-input-wrapper">
+          <input type="text" class="search-input" id="searchInput" placeholder="Digite para buscar..." autocomplete="off">
+          <span class="search-icon">🔍</span>
+          <button class="search-close" id="searchClose" title="Fechar Busca">&times;</button>
+          <span class="search-count" id="searchCount"></span>
+        </div>
+      </div>
     </header>
 
     <main class="task-list" id="taskList"></main>
@@ -39,26 +47,26 @@
       <p>Nenhuma tarefa ainda.</p>
       <p class="hint">Digite uma tarefa acima ou cole uma imagem (Ctrl+V)</p>
     </div>
-
-    <footer class="footer">
-      <div class="footer-top">
-        <div class="footer-logo-wrapper">
-          <img src="jglopes.png" alt="Logo" class="footer-logo">
-        </div>
-        <button class="btn-export" id="btnExport">Exportar Tarefas (TXT)</button>
-        <button class="btn-export" id="btnImport">Importar Tarefas (TXT)</button>
-        <button class="btn-export btn-danger" id="btnDeleteAll">Excluir Todas</button>
-        <input type="file" id="fileImport" accept=".txt" style="display:none;">
-      </div>
-      <small>Suas tarefas são salvas no navegador. Se limpar o cache, elas serão excluídas.</small>
-      <div class="shortcuts">
-        <span title="Nova tarefa"><kbd>INSERT</kbd> Nova tarefa</span>
-        <span title="Buscar"><kbd>CTRL</kbd>+<kbd>B</kbd> Buscar</span>
-        <span title="Excluir"><kbd>DEL</kbd> Excluir</span>
-        <span title="Navegar"><kbd>↑</kbd><kbd>↓</kbd> Mover</span>
-      </div>
-    </footer>
   </div>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-logo-wrapper">
+        <img src="jglopes.png" alt="Logo" class="footer-logo">
+      </div>
+      <button class="btn-export" id="btnExport">Exportar Tarefas (TXT)</button>
+      <button class="btn-export" id="btnImport">Importar Tarefas (TXT)</button>
+      <button class="btn-export btn-danger" id="btnDeleteAll">Excluir Todas</button>
+      <input type="file" id="fileImport" accept=".txt" style="display:none;">
+    </div>
+    <small>Suas tarefas são salvas no navegador. Se limpar o cache, elas serão excluídas.</small>
+    <div class="shortcuts">
+      <span title="Nova tarefa"><kbd>INSERT</kbd> Nova tarefa</span>
+      <span title="Buscar"><kbd>CTRL</kbd>+<kbd>B</kbd> Buscar</span>
+      <span title="Excluir"><kbd>DEL</kbd> Excluir</span>
+      <span title="Navegar"><kbd>↑</kbd><kbd>↓</kbd> Mover</span>
+    </div>
+  </footer>
 
   <div class="toast" id="toast"></div>
 
@@ -87,15 +95,6 @@
         <button class="btn-confirm btn-cancel" id="confirmDeleteAllCancel">Cancelar</button>
         <button class="btn-confirm btn-delete-confirm" id="confirmDeleteAllBtn" disabled>Excluir Todas</button>
       </div>
-    </div>
-  </div>
-
-  <div class="search-bar" id="searchBar">
-    <div class="search-input-wrapper">
-      <input type="text" class="search-input" id="searchInput" placeholder="Digite para buscar..." autocomplete="off">
-      <span class="search-icon">🔍</span>
-      <button class="search-close" id="searchClose" title="Fechar Busca">&times;</button>
-      <span class="search-count" id="searchCount"></span>
     </div>
   </div>
 
