@@ -485,15 +485,9 @@ body {
   opacity: 1;
 }
 
-.empty-state {
-  display: none;
-  text-align: center;
-  padding: var(--spacing-xl);
-  color: var(--text-muted);
-}
-
-.empty-state.visible {
-  display: block;
+[data-theme="light"] .toast-undo {
+  background: var(--primary);
+  color: #fff;
 }
 
 .empty-state .hint {
@@ -591,44 +585,7 @@ body {
   margin-right: 2px;
 }
 
-.toast {
-  position: fixed;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  transform: translateX(calc(100% + 50px));
-  background: var(--toast-bg);
-  color: var(--text);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  opacity: 0;
-  transition: transform 0.3s, opacity 0.3s;
-  z-index: 1000;
-  border-left: 3px solid var(--primary);
-  box-shadow: var(--toast-shadow);
-}
 
-.toast.success { border-left-color: #4caf50; }
-.toast.success::before { content: '✓ '; color: #4caf50; font-weight: bold; }
-
-.toast.info { border-left-color: #2196f3; }
-.toast.info::before { content: 'ℹ '; color: #2196f3; font-weight: bold; }
-
-.toast.warning { border-left-color: #ff9800; }
-.toast.warning::before { content: '⚠ '; color: #ff9800; font-weight: bold; }
-
-.toast.error { border-left-color: #f44336; }
-.toast.error::before { content: '✕ '; color: #f44336; font-weight: bold; }
-
-.toast.visible {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-.toast.hide {
-  transform: translateX(calc(100% + 50px));
-  opacity: 0;
-}
 
 .modal {
   display: none;
@@ -1330,3 +1287,240 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 
 .task-skeleton .skeleton-line:nth-child(1) { width: 80%; }
 .task-skeleton .skeleton-line:nth-child(2) { width: 60%; }
+
+/* ==================== PROGRESS BAR ==================== */
+.progress-bar {
+  position: relative;
+  height: 6px;
+  background: var(--surface);
+  border-radius: 3px;
+  margin-top: var(--spacing-sm);
+  overflow: visible;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 0%;
+}
+
+.progress-text {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ==================== SAVE INDICATOR ==================== */
+.save-indicator {
+  font-size: 0.65rem;
+  color: #4caf50;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 30px;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.save-indicator.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==================== TOAST WITH UNDO ==================== */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  transform: translateX(calc(100% + 50px));
+  background: var(--toast-bg);
+  color: var(--text);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  z-index: 1000;
+  border-left: 3px solid var(--primary);
+  box-shadow: var(--toast-shadow);
+}
+
+.toast.success { border-left-color: #4caf50; }
+.toast.info { border-left-color: #2196f3; }
+.toast.warning { border-left-color: #ff9800; }
+.toast.error { border-left-color: #f44336; }
+
+.toast-text { flex: 1; }
+
+.toast-undo {
+  display: none;
+  background: var(--primary);
+  color: #121212;
+  border: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.toast.undo-visible .toast-undo { display: inline-block; }
+
+.toast-undo:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
+}
+
+/* ==================== EMPTY STATE SVG ==================== */
+.empty-state {
+  display: none;
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-muted);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.empty-state.visible {
+  display: flex;
+}
+
+.empty-svg {
+  opacity: 0.3;
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-svg svg {
+  color: var(--text);
+  width: 80px;
+  height: 80px;
+}
+
+.empty-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ==================== SEÇÕES COLAPSÁVEIS ==================== */
+.task-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--spacing-sm);
+  transition: opacity 0.2s;
+}
+
+.task-section-header:hover {
+  opacity: 0.8;
+}
+
+.section-arrow {
+  transition: transform 0.25s ease;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.section-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.task-section.collapsed .task-items {
+  display: none;
+}
+
+/* ==================== FILTRO ATIVO ==================== */
+.counter.filter-active {
+  border-bottom: 2px solid var(--primary);
+  background: rgba(187, 134, 252, 0.1);
+  color: var(--primary);
+}
+
+/* ==================== COUNTDOWN ==================== */
+.confirm-countdown {
+  display: none;
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.85rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.confirm-countdown.visible {
+  display: block;
+  animation: pulseCountdown 1s ease infinite;
+}
+
+@keyframes pulseCountdown {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ==================== SWIPE TO DELETE ==================== */
+.task-item.swiping {
+  transition: transform 0.05s linear;
+}
+
+.task-item.swiped {
+  animation: swipeOut 0.3s ease-out forwards;
+}
+
+@keyframes swipeOut {
+  to {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+}
+
+/* ==================== NOTIFICAÇÃO SONORA (visual) ==================== */
+.sound-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: var(--spacing-sm);
+  transition: opacity 0.2s;
+}
+
+.sound-indicator:hover {
+  opacity: 0.8;
+}
+
+.sound-indicator.muted {
+  opacity: 0.3;
+  text-decoration: line-through;
+}

@@ -12,6 +12,7 @@
     <header class="header">
       <div class="title-wrapper">
         <h1 class="title">Minha lista de tarefas</h1>
+        <span class="save-indicator" id="saveIndicator">Salvo ✓</span>
         <button class="theme-toggle" id="themeToggle" title="Alternar tema">☀️</button>
       </div>
       <div class="counters">
@@ -40,12 +41,23 @@
           <span class="search-count" id="searchCount"></span>
         </div>
       </div>
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+        <span class="progress-text" id="progressText"></span>
+      </div>
     </header>
 
     <main class="task-list" id="taskList"></main>
 
     <div class="empty-state" id="emptyState">
-      <p>Nenhuma tarefa ainda.</p>
+      <div class="empty-svg">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="45" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+          <path d="M45 60l10 10 20-20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+          <rect x="35" y="35" width="50" height="50" rx="8" stroke="currentColor" stroke-width="2" opacity="0.15"/>
+        </svg>
+      </div>
+      <p class="empty-title" id="emptyTitle">Nenhuma tarefa ainda</p>
       <p class="hint">Digite uma tarefa acima ou cole uma imagem (Ctrl+V)</p>
     </div>
   </div>
@@ -69,7 +81,10 @@
     </div>
   </footer>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast">
+    <span class="toast-text" id="toastText"></span>
+    <button class="toast-undo" id="toastUndo">Desfazer</button>
+  </div>
 
   <div class="modal" id="imageModal">
     <button class="modal-close" id="modalClose">&times;</button>
@@ -92,6 +107,7 @@
       <p class="confirm-text">Tem certeza absoluta de que deseja excluir todas as tarefas?</p>
       <p class="confirm-warning"><strong>Esta ação não pode ser desfeita. Recomendamos exportar em TXT para ter um backup.</strong></p>
       <input type="text" class="confirm-input" id="confirmDeleteAllInput" placeholder='Escreva "tenho certeza" para continuar' autocomplete="off">
+      <div class="confirm-countdown" id="confirmCountdown"></div>
       <div class="confirm-actions">
         <button class="btn-confirm btn-cancel" id="confirmDeleteAllCancel">Cancelar</button>
         <button class="btn-confirm btn-delete-confirm" id="confirmDeleteAllBtn" disabled>Excluir Todas</button>
