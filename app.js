@@ -430,6 +430,34 @@ const elements = {
     });
   }
 
+  function renderTaskSection(title, sectionTasks, isCompleted) {
+    const itemsHtml = sectionTasks.map(task => renderTaskItem(task)).join('');
+    const collapsed = isCompleted ? 'collapsed' : '';
+    return `
+      <div class="task-section ${collapsed}" data-completed="${isCompleted}">
+        <div class="task-section-header">
+          <span class="section-arrow ${collapsed}">▼</span>
+          <span class="section-title">${title}</span>
+          <span class="section-count">${sectionTasks.length}</span>
+        </div>
+        <div class="task-items">
+          ${itemsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachSectionEvents() {
+    document.querySelectorAll('.task-section-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const section = header.closest('.task-section');
+        section.classList.toggle('collapsed');
+        const arrow = header.querySelector('.section-arrow');
+        arrow.classList.toggle('collapsed');
+      });
+    });
+  }
+
   function attachTaskEvents() {
     document.querySelectorAll('.task-item').forEach(item => {
       const taskId = item.dataset.taskId;
@@ -504,39 +532,21 @@ const elements = {
                 if (file.type.startsWith('image/')) {
                   const base64 = await compressImage(file);
                   addImageToTask(taskId, base64);
-  }
-
-  function renderTaskSection(title, sectionTasks, isCompleted) {
-    const itemsHtml = sectionTasks.map(task => renderTaskItem(task)).join('');
-    const collapsed = isCompleted ? 'collapsed' : '';
-    return `
-      <div class="task-section ${collapsed}" data-completed="${isCompleted}">
-        <div class="task-section-header">
-          <span class="section-arrow ${collapsed}">▼</span>
-          <span class="section-title">${title}</span>
-          <span class="section-count">${sectionTasks.length}</span>
-        </div>
-        <div class="task-items">
-          ${itemsHtml}
-        </div>
-      </div>
-    `;
-  }
-
-  function attachSectionEvents() {
-    document.querySelectorAll('.task-section-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const section = header.closest('.task-section');
-        section.classList.toggle('collapsed');
-        const arrow = header.querySelector('.section-arrow');
-        arrow.classList.toggle('collapsed');
-      });
-    });
-  }
+                }
               }
             };
             input.click();
           }
+        });
+      }
+
+      const priorityBtns = item.querySelectorAll('.task-priority-btn');
+      priorityBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setPriority(taskId, btn.dataset.priority);
+        });
+      });
         });
       }
 
