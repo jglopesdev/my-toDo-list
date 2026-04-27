@@ -24,6 +24,27 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --toast-bg: #1e1e1e;
+  --toast-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --search-bg: rgba(30, 30, 30, 0.95);
+}
+
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface-hover: #e8eaed;
+  --border: #d0d3d8;
+  --primary: #7c4dff;
+  --primary-hover: #9e7cff;
+  --text: #1a1a1a;
+  --text-muted: #5f6368;
+  --completed: #9e9e9e;
+  --danger: #d93025;
+  --danger-hover: #ea4335;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --toast-bg: #ffffff;
+  --toast-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --search-bg: rgba(255, 255, 255, 0.98);
 }
 
 body {
@@ -48,12 +69,35 @@ body {
   margin-bottom: var(--spacing-xl);
 }
 
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
 .title {
   font-size: 1.75rem;
   font-weight: 600;
   color: var(--text);
   text-align: center;
   letter-spacing: -0.5px;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 4px;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .counters {
@@ -537,7 +581,7 @@ body {
   top: var(--spacing-md);
   right: var(--spacing-md);
   transform: translateX(calc(100% + 50px));
-  background: var(--surface);
+  background: var(--toast-bg);
   color: var(--text);
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius);
@@ -546,7 +590,7 @@ body {
   transition: transform 0.3s, opacity 0.3s;
   z-index: 1000;
   border-left: 3px solid var(--primary);
-  box-shadow: var(--shadow);
+  box-shadow: var(--toast-shadow);
 }
 
 .toast.success { border-left-color: #4caf50; }
@@ -797,14 +841,21 @@ body {
 .search-input {
   width: 100%;
   padding: 14px 48px 14px 44px;
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--search-bg);
   border: 1px solid var(--primary);
   border-radius: 24px;
   color: var(--text);
   font-size: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow);
   outline: none;
-  backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .search-input {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .search-input:focus {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(124, 77, 255, 0.15);
 }
 
 .search-input::placeholder {

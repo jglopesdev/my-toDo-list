@@ -13,8 +13,8 @@ let tasks = [];
   let idCounter = 0;
   let saveDebounceTimer = null;
   let searchResults = [];
-  let searchBarVisible = false;
-  let sortedTaskIds = []; // IDs das tarefas na ordem de prioridade
+let searchBarVisible = false;
+  let currentTheme = 'dark';
 
   const elements = {
     taskInput: document.getElementById('taskInput'),
@@ -44,7 +44,8 @@ let tasks = [];
     searchBar: document.getElementById('searchBar'),
     searchInput: document.getElementById('searchInput'),
     searchClose: document.getElementById('searchClose'),
-    searchCount: document.getElementById('searchCount')
+    searchCount: document.getElementById('searchCount'),
+    themeToggle: document.getElementById('themeToggle')
   };
 
   let pendingDeleteId = null;
@@ -81,24 +82,11 @@ let tasks = [];
         currentFilter = parsed.currentFilter || null;
         idCounter = parsed.idCounter || 0;
       } else {
-        autoRestore();
+        tasks = [];
       }
     } catch (e) {
       console.error('Erro ao carregar tarefas:', e);
       tasks = [];
-      autoRestore();
-    }
-  }
-
-  async function autoRestore() {
-    try {
-      const response = await fetch('tarefas_2026-04-27.txt');
-      if (response.ok) {
-        const content = await response.text();
-        importFromContent(content, true); // isRestore=true → mostra toast
-      }
-    } catch (e) {
-      console.log('Nenhum backup encontrado');
     }
   }
 
@@ -1101,4 +1089,24 @@ let tasks = [];
   }
   
   console.log('ToDoList initialized - CTRL+B para buscar, DEL para excluir');
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('todolist_theme', currentTheme);
+  }
+
+  function loadTheme() {
+    const saved = localStorage.getItem('todolist_theme');
+    if (saved === 'dark' || saved === 'light') {
+      currentTheme = saved;
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    }
+  }
+
+  loadTheme();
+
+  elements.themeToggle.addEventListener('click', toggleTheme);
 })();

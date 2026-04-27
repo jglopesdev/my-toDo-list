@@ -12,6 +12,7 @@ Aplicação web de gerenciamento de tarefas com prioridades, filtros, busca e ba
 - **Buscar**: Ctrl+B para abrir a barra de busca
 - **Navegar**: Use as setas ↑↓ para mover entre tarefas
 - **Excluir**: Pressione DEL na tarefa selecionada, confirme com Enter ou E
+- **Tema**: Clique no ícone ☀️/🌙 para alternar entre tema claro e escuro
 
 ## Atalhos de Teclado
 
@@ -29,7 +30,6 @@ Aplicação web de gerenciamento de tarefas com prioridades, filtros, busca e ba
 - As tarefas são salvas automaticamente no navegador (localStorage)
 - **Exportar**: Baixe um arquivo TXT com todas as tarefas
 - **Importar**: Restaure tarefas de um arquivo TXT
-- **Restauração automática**: Ao abrir a página sem tarefas, tentará restaurar do arquivo `tarefas_YYYY-MM-DD.txt` (se existir na mesma pasta)
 
 ## Limites
 
