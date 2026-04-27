@@ -13,7 +13,8 @@ let tasks = [];
   let idCounter = 0;
   let saveDebounceTimer = null;
   let searchResults = [];
-let searchBarVisible = false;
+  let searchBarVisible = false;
+  let sortedTaskIds = [];
   let currentTheme = 'dark';
 
   const elements = {
