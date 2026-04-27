@@ -29,6 +29,12 @@ let tasks = [];
     modalClose: document.getElementById('modalClose'),
     btnExport: document.getElementById('btnExport'),
     btnImport: document.getElementById('btnImport'),
+    btnDeleteAll: document.getElementById('btnDeleteAll'),
+    confirmDeleteAllModal: document.getElementById('confirmDeleteAllModal'),
+    confirmDeleteAllMessage: document.getElementById('confirmDeleteAllMessage'),
+    confirmDeleteAllInput: document.getElementById('confirmDeleteAllInput'),
+    confirmDeleteAllBtn: document.getElementById('confirmDeleteAllBtn'),
+    confirmDeleteAllCancel: document.getElementById('confirmDeleteAllCancel'),
     
     fileImport: document.getElementById('fileImport'),
     confirmModal: document.getElementById('confirmModal'),
@@ -937,6 +943,32 @@ let tasks = [];
     elements.btnExport.addEventListener('click', exportTasksToTxt);
     elements.btnImport.addEventListener('click', () => elements.fileImport.click());
     elements.fileImport.addEventListener('change', importTasksFromTxt);
+    elements.btnDeleteAll.addEventListener('click', () => {
+      elements.confirmDeleteAllModal.classList.add('visible');
+      elements.confirmDeleteAllInput.value = '';
+      elements.confirmDeleteAllBtn.disabled = true;
+    });
+    elements.confirmDeleteAllInput.addEventListener('input', (e) => {
+      const value = e.target.value.trim().toLowerCase();
+      elements.confirmDeleteAllBtn.disabled = value !== 'tenho certeza';
+    });
+    elements.confirmDeleteAllBtn.addEventListener('click', () => {
+      tasks = [];
+      selectedId = null;
+      editingId = null;
+      saveTasksSync();
+      renderTasks();
+      elements.confirmDeleteAllModal.classList.remove('visible');
+      showToast('Todas as tarefas foram excluídas!', 'warning');
+    });
+    elements.confirmDeleteAllCancel.addEventListener('click', () => {
+      elements.confirmDeleteAllModal.classList.remove('visible');
+    });
+    elements.confirmDeleteAllModal.addEventListener('click', (e) => {
+      if (e.target === elements.confirmDeleteAllModal) {
+        elements.confirmDeleteAllModal.classList.remove('visible');
+      }
+    });
     elements.btnClearFilter.addEventListener('click', () => {
       currentFilter = null;
       saveTasksSync();

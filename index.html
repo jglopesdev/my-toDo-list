@@ -47,6 +47,7 @@
         </div>
         <button class="btn-export" id="btnExport">Exportar Tarefas (TXT)</button>
         <button class="btn-export" id="btnImport">Importar Tarefas (TXT)</button>
+        <button class="btn-export btn-danger" id="btnDeleteAll">Excluir Todas</button>
         <input type="file" id="fileImport" accept=".txt" style="display:none;">
       </div>
       <small>Suas tarefas são salvas no navegador. Se limpar o cache, elas serão excluídas.</small>
@@ -72,6 +73,19 @@
       <div class="confirm-actions">
         <button class="btn-confirm btn-cancel" id="confirmCancel">Cancelar</button>
         <button class="btn-confirm btn-delete-confirm" id="confirmDelete">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-modal" id="confirmDeleteAllModal">
+    <div class="confirm-content">
+      <p class="confirm-message" id="confirmDeleteAllMessage">Excluir todas as tarefas</p>
+      <p class="confirm-text">Tem certeza absoluta de que deseja excluir todas as tarefas?</p>
+      <p class="confirm-warning"><strong>Esta ação não pode ser desfeita. Recomendamos exportar em TXT para ter um backup.</strong></p>
+      <input type="text" class="confirm-input" id="confirmDeleteAllInput" placeholder='Escreva "tenho certeza" para continuar' autocomplete="off">
+      <div class="confirm-actions">
+        <button class="btn-confirm btn-cancel" id="confirmDeleteAllCancel">Cancelar</button>
+        <button class="btn-confirm btn-delete-confirm" id="confirmDeleteAllBtn" disabled>Excluir Todas</button>
       </div>
     </div>
   </div>
