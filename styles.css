@@ -526,11 +526,18 @@ body {
   gap: var(--spacing-md);
 }
 
+.footer-logo-wrapper {
+  background: #1a1a21;
+  padding: 6px;
+  border-radius: 7px;
+}
+
 .footer-logo {
   max-width: 60px;
   max-height: 40px;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 4px;
+  display: block;
 }
 
 .btn-export {
