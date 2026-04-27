@@ -35,6 +35,7 @@ Aplicação web de gerenciamento de tarefas com prioridades, filtros, busca e ba
 
 - Armazenamento: ~5-10MB (depende do navegador)
 - Imagens são compactadas automaticamente (max 500x500px, 60% qualidade)
+- Máximo de 5 imagens por tarefa
 - Ao atingir o limite, será notificado para remover imagens/tarefas antigas
 
 ## Formato do Arquivo TXT
@@ -53,3 +54,7 @@ Total: 2 tarefas | Pendentes: 1 | Concluídas: 1
 - HTML5, CSS3, JavaScript (vanilla)
 - Sem dependências externas
 - Armazenamento local (localStorage)
+
+## Atalhos Visíveis
+
+Os atalhos também estão disponíveis no rodapé da aplicação para referência rápida.
