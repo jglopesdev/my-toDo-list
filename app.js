@@ -426,15 +426,19 @@ let tasks = [];
       return null;
     }
 
+    renderTasks();
+    selectTask(task.id);
+    
+    // Scroll até a tarefa criada
+    const taskEl = document.querySelector(`[data-task-id="${task.id}"]`);
+    if (taskEl) {
+      taskEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     if (image && !text) {
-      renderTasks();
-      selectTask(task.id);
       setTimeout(() => {
         startEditing(task.id);
       }, 150);
-    } else {
-      renderTasks();
-      selectTask(task.id);
     }
     return task;
   }
