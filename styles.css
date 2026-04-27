@@ -703,7 +703,7 @@ body {
   background: var(--surface);
   padding: var(--spacing-lg);
   border-radius: var(--radius);
-  max-width: 320px;
+  max-width: 420px;
   width: 90%;
   box-shadow: var(--shadow);
 }
