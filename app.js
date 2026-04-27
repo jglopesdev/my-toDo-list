@@ -604,9 +604,13 @@ const elements = {
         const draggedId = e.dataTransfer.getData('text/plain');
         const fromIndex = tasks.findIndex(t => t.id === draggedId);
         const toIndex = tasks.findIndex(t => t.id === taskId);
-        if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-          reorderTasks(fromIndex, toIndex);
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+        const targetTask = tasks[toIndex];
+        if (targetTask && targetTask.priority && targetTask.priority !== 'none') {
+          showToast('Não mova para posição de tarefa com prioridade', 'warning');
+          return;
         }
+        reorderTasks(fromIndex, toIndex);
       });
     });
   }
