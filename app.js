@@ -1,0 +1,1104 @@
+(function() {
+  'use strict';
+
+  const STORAGE_KEY = 'todolist_data';
+  const MAX_IMAGE_SIZE = 500;
+  const IMAGE_QUALITY = 0.6;
+  const IMAGE_PLACEHOLDER = 'Detalhe a tarefa relacionada a esta imagem...';
+
+let tasks = [];
+  let selectedId = null;
+  let editingId = null;
+  let currentFilter = null;
+  let idCounter = 0;
+  let saveDebounceTimer = null;
+  let searchResults = [];
+  let searchBarVisible = false;
+  let sortedTaskIds = []; // IDs das tarefas na ordem de prioridade
+
+  const elements = {
+    taskInput: document.getElementById('taskInput'),
+    taskList: document.getElementById('taskList'),
+    emptyState: document.getElementById('emptyState'),
+    toast: document.getElementById('toast'),
+    imageModal: document.getElementById('imageModal'),
+    modalImage: document.getElementById('modalImage'),
+    modalClose: document.getElementById('modalClose'),
+    btnExport: document.getElementById('btnExport'),
+    btnImport: document.getElementById('btnImport'),
+    
+    fileImport: document.getElementById('fileImport'),
+    confirmModal: document.getElementById('confirmModal'),
+    confirmCancel: document.getElementById('confirmCancel'),
+    confirmDelete: document.getElementById('confirmDelete'),
+    confirmMessage: document.getElementById('confirmMessage'),
+    counterTotal: document.getElementById('counterTotal'),
+    counterPending: document.getElementById('counterPending'),
+    counterCompleted: document.getElementById('counterCompleted'),
+    counterNone: document.getElementById('counterNone'),
+    counterCritical: document.getElementById('counterCritical'),
+    counterHigh: document.getElementById('counterHigh'),
+    counterMedium: document.getElementById('counterMedium'),
+    counterLow: document.getElementById('counterLow'),
+    btnClearFilter: document.getElementById('btnClearFilter'),
+    searchBar: document.getElementById('searchBar'),
+    searchInput: document.getElementById('searchInput'),
+    searchClose: document.getElementById('searchClose'),
+    searchCount: document.getElementById('searchCount')
+  };
+
+  let pendingDeleteId = null;
+
+  function loadTasks() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+        tasks = tasks.map(t => ({
+          ...t,
+          priority: t.priority || 'none',
+          images: t.image ? [t.image] : (t.images || [])
+        }));
+
+        // Normalizar IDs legados (sem sufixo numérico)
+        tasks.forEach(t => {
+          if (!t.id.includes('-')) {
+            t.id = t.id + '-leg';
+          }
+        });
+
+        // Restaurar idCounter do maior sufixo numérico existente
+        tasks.forEach(t => {
+          const match = t.id.match(/-(\d+)$/);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > idCounter) idCounter = n;
+          }
+        });
+
+        selectedId = parsed.selectedId || null;
+        currentFilter = parsed.currentFilter || null;
+        idCounter = parsed.idCounter || 0;
+      } else {
+        autoRestore();
+      }
+    } catch (e) {
+      console.error('Erro ao carregar tarefas:', e);
+      tasks = [];
+      autoRestore();
+    }
+  }
+
+  async function autoRestore() {
+    try {
+      const response = await fetch('tarefas_2026-04-27.txt');
+      if (response.ok) {
+        const content = await response.text();
+        importFromContent(content, true); // isRestore=true → mostra toast
+      }
+    } catch (e) {
+      console.log('Nenhum backup encontrado');
+    }
+  }
+
+  function saveTasks() {
+    clearTimeout(saveDebounceTimer);
+    saveDebounceTimer = setTimeout(() => {
+      try {
+        const data = { tasks, selectedId, currentFilter, idCounter };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.error('Erro ao salvar tarefas:', e);
+        showToast('Erro ao salvar. Limite de armazenamento excedido.');
+      }
+    }, 300);
+  }
+
+  function saveTasksSync() {
+    clearTimeout(saveDebounceTimer);
+    try {
+      const data = { tasks, selectedId, currentFilter, idCounter };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      console.error('Erro ao salvar tarefas:', e);
+      return false;
+    }
+  }
+
+  function generateId() {
+    return Date.now().toString() + '-' + (++idCounter);
+  }
+
+  function showToast(message, type = '') {
+    elements.toast.textContent = message;
+    elements.toast.className = 'toast visible ' + type;
+    setTimeout(() => {
+      elements.toast.classList.add('hide');
+      setTimeout(() => {
+        elements.toast.className = 'toast';
+      }, 300);
+    }, 3000);
+  }
+
+  function renderTasks() {
+    const totalCount = tasks.length;
+    const pendingCount = tasks.filter(t => !t.completed).length;
+    const completedCount = tasks.filter(t => t.completed).length;
+    const noneCount = tasks.filter(t => t.priority === 'none' && !t.completed).length;
+    const criticalCount = tasks.filter(t => t.priority === 'critical' && !t.completed).length;
+    const highCount = tasks.filter(t => t.priority === 'high' && !t.completed).length;
+    const mediumCount = tasks.filter(t => t.priority === 'medium' && !t.completed).length;
+    const lowCount = tasks.filter(t => t.priority === 'low' && !t.completed).length;
+
+    elements.counterTotal.textContent = `${totalCount} tarefa${totalCount !== 1 ? 's' : ''}`;
+    elements.counterPending.textContent = `${pendingCount} pendente${pendingCount !== 1 ? 's' : ''}`;
+    elements.counterCompleted.textContent = `${completedCount} concluída${completedCount !== 1 ? 's' : ''}`;
+    elements.counterNone.textContent = `${noneCount} sem priori.`;
+    elements.counterCritical.textContent = `${criticalCount} crítica`;
+    elements.counterHigh.textContent = `${highCount} alta`;
+    elements.counterMedium.textContent = `${mediumCount} média`;
+    elements.counterLow.textContent = `${lowCount} baixa`;
+
+    elements.btnClearFilter.style.display = currentFilter ? 'inline-block' : 'none';
+
+    let filteredTasks = tasks;
+    if (currentFilter) {
+      if (currentFilter === 'none') {
+        filteredTasks = tasks.filter(t => t.priority === 'none');
+      } else if (currentFilter === 'pending') {
+        filteredTasks = tasks.filter(t => !t.completed);
+      } else if (currentFilter === 'completed') {
+        filteredTasks = tasks.filter(t => t.completed);
+      } else {
+        filteredTasks = tasks.filter(t => t.priority === currentFilter);
+      }
+    }
+
+    if (filteredTasks.length === 0) {
+      elements.taskList.innerHTML = '';
+      elements.emptyState.classList.add('visible');
+      return;
+    }
+
+    elements.emptyState.classList.remove('visible');
+    const sortedTasks = sortTasksByPriority(filteredTasks);
+    sortedTaskIds = sortedTasks.map(t => t.id); // Salvar ordem para navegação
+    elements.taskList.innerHTML = sortedTasks.map(task => renderTaskItem(task)).join('');
+
+    attachTaskEvents();
+  }
+
+  function sortTasksByPriority(taskList) {
+    const priorityOrder = { critical: 1, high: 2, medium: 3, low: 4, none: 5 };
+    return [...taskList].sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
+    });
+  }
+
+  function renderTaskItem(task) {
+    const isEditing = editingId === task.id;
+    const isImageOnlyTask = task.images && task.images.length > 0 && (!task.text || task.text === IMAGE_PLACEHOLDER);
+    const rawText = isImageOnlyTask ? IMAGE_PLACEHOLDER : task.text;
+    const escapedText = escapeHtml(rawText);
+    let linkedText = linkify(escapedText);
+
+    // Highlight das palavras buscadas
+    if (searchResults.includes(task.id) && elements.searchInput.value.trim()) {
+      const searchTerms = elements.searchInput.value.toLowerCase().trim().split(/\s+/);
+      searchTerms.forEach(term => {
+        const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+        linkedText = linkedText.replace(regex, '<mark>$1</mark>');
+      });
+    }
+
+    const displayText = isImageOnlyTask ? IMAGE_PLACEHOLDER : linkedText;
+    const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
+
+    let imageHtml = '';
+    if (task.images && task.images.length > 0) {
+      const images = task.images.map((img, idx) => `
+        <div class="task-image-wrapper">
+          <img class="task-image" data-task-id="${task.id}" data-image-index="${idx}" src="${img}" alt="Anexo ${idx + 1}">
+          <button class="btn-delete-image" data-task-id="${task.id}" data-image-index="${idx}" title="Excluir imagem">&times;</button>
+        </div>
+      `).join('');
+      const addBtn = `<button type="button" class="btn-add-image added-img-btn" data-task-id="${task.id}" title="Adicionar imagem" style="width:32px;height:32px;min-width:32px;background:transparent;border:2px dashed #555;border-radius:6px;color:#777;font-size:18px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;">+</button>`;
+      imageHtml = `<div class="task-images-container">${images}${addBtn}</div>`;
+    }
+
+    const priorityButtons = `
+      <div class="task-priority" data-task-id="${task.id}">
+        <button class="task-priority-btn priority-critical ${task.priority === 'critical' ? 'active' : ''}" data-priority="critical" title="Crítica">C</button>
+        <button class="task-priority-btn priority-high ${task.priority === 'high' ? 'active' : ''}" data-priority="high" title="Alta">A</button>
+        <button class="task-priority-btn priority-medium ${task.priority === 'medium' ? 'active' : ''}" data-priority="medium" title="Média">M</button>
+        <button class="task-priority-btn priority-low ${task.priority === 'low' ? 'active' : ''}" data-priority="low" title="Baixa">B</button>
+      </div>
+    `;
+
+    if (isEditing) {
+      return `
+        <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
+          <div class="task-content">
+            <textarea class="task-text-input" data-task-id="${task.id}">${escapeHtml(task.text)}</textarea>
+            ${imageHtml}
+          </div>
+          ${priorityButtons}
+          <div class="task-actions">
+            <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir">&times;</button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
+        <span class="drag-handle">⋮⋮</span>
+        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
+        <div class="task-content">
+          <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${displayText}</div>
+          ${imageHtml}
+        </div>
+        ${priorityButtons}
+        <div class="task-actions">
+          <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir">&times;</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.(com|net|org|br|io|dev|app|live)[^\s]*)/gi;
+    return text.replace(urlRegex, (match) => {
+      let url = match;
+      if (!url.startsWith('http') && !url.startsWith('www')) {
+        url = 'https://' + url;
+      }
+      return `<a href="${url}" target="_blank" rel="noopener" class="task-link">${match}</a>`;
+    });
+  }
+
+  function attachTaskEvents() {
+    document.querySelectorAll('.task-item').forEach(item => {
+      const taskId = item.dataset.taskId;
+
+      item.addEventListener('click', (e) => {
+        if (e.target.classList.contains('drag-handle')) return;
+        if (e.target.classList.contains('task-checkbox')) return;
+        if (e.target.classList.contains('btn') || e.target.closest('.btn')) return;
+        if (e.target.classList.contains('task-image')) return;
+        if (e.target.classList.contains('task-priority-btn')) return;
+        if (e.target.closest('.task-priority')) return;
+        if (e.dataTransfer?.getData('text/plain')) return;
+        if (editingId === taskId) return;
+        selectTask(taskId);
+      });
+
+      const checkbox = item.querySelector('.task-checkbox');
+      if (checkbox) {
+        checkbox.addEventListener('change', () => toggleComplete(taskId));
+      }
+
+      const textEl = item.querySelector('.task-text');
+      if (textEl) {
+        textEl.addEventListener('dblclick', () => startEditing(taskId));
+      }
+
+      const textInput = item.querySelector('.task-text-input');
+      if (textInput) {
+        textInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            saveEditing(taskId);
+          }
+          if (e.key === 'Escape') {
+            cancelEditing();
+          }
+        });
+        textInput.addEventListener('blur', () => {
+          if (editingId === taskId) {
+            saveEditing(taskId);
+          }
+        });
+      }
+
+      const deleteBtn = item.querySelector('.btn-delete');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          confirmDeleteTask(taskId);
+        });
+      }
+
+      const imageContainer = item.querySelector('.task-images-container');
+      if (imageContainer) {
+        imageContainer.addEventListener('click', (e) => {
+          const target = e.target;
+          if (target.tagName === 'IMG' && target.classList.contains('task-image')) {
+            e.stopPropagation();
+            openModal(target.src);
+          } else if (target.classList.contains('btn-delete-image')) {
+            e.stopPropagation();
+            const index = parseInt(target.dataset.imageIndex, 10);
+            deleteTaskImage(taskId, isNaN(index) ? null : index);
+          } else if (target.classList.contains('btn-add-image')) {
+            e.stopPropagation();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.onchange = async (evt) => {
+              for (const file of evt.target.files) {
+                if (file.type.startsWith('image/')) {
+                  const base64 = await compressImage(file);
+                  addImageToTask(taskId, base64);
+                }
+              }
+            };
+            input.click();
+          }
+        });
+      }
+
+      const priorityBtns = item.querySelectorAll('.task-priority-btn');
+      priorityBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setPriority(taskId, btn.dataset.priority);
+        });
+      });
+
+      item.addEventListener('dragstart', (e) => {
+        item.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.task-item').forEach(el => el.classList.remove('drag-over'));
+      });
+
+      item.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+      });
+
+      item.addEventListener('dragleave', () => {
+        item.classList.remove('drag-over');
+      });
+
+      item.addEventListener('drop', (e) => {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const fromIndex = tasks.findIndex(t => t.id === draggedId);
+        const toIndex = tasks.findIndex(t => t.id === taskId);
+        if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+          reorderTasks(fromIndex, toIndex);
+        }
+      });
+    });
+  }
+
+  function createTask(text, image = null) {
+    const task = {
+      id: generateId(),
+      text: text || IMAGE_PLACEHOLDER,
+      completed: false,
+      images: image ? [image] : [],
+      priority: 'none',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    tasks.unshift(task);
+
+    if (!saveTasksSync()) {
+      tasks.shift();
+      showToast('Limite de armazenamento excedido. Não é possível adicionar mais tarefas com imagens.', 'error');
+      return null;
+    }
+
+    if (image && !text) {
+      renderTasks();
+      selectTask(task.id);
+      setTimeout(() => {
+        startEditing(task.id);
+      }, 150);
+    } else {
+      renderTasks();
+      selectTask(task.id);
+    }
+    return task;
+  }
+
+  function addTask() {
+    const text = elements.taskInput.value.trim();
+    if (!text) return;
+    createTask(text);
+    elements.taskInput.value = '';
+    showToast('Tarefa cadastrada!', 'success');
+  }
+
+  function selectTask(taskId) {
+    selectedId = taskId;
+    saveTasks();
+    renderTasks();
+  }
+
+  function clearSelection() {
+    if (editingId) {
+      saveEditing(editingId);
+    }
+    if (selectedId) {
+      selectedId = null;
+      saveTasks();
+      renderTasks();
+    }
+  }
+
+  function exportTasksToTxt() {
+    if (tasks.length === 0) {
+      showToast('Nenhuma tarefa para exportar');
+      return;
+    }
+
+    elements.btnExport.disabled = true;
+    elements.btnExport.textContent = 'Exportando...';
+
+    const priorityLabels = { critical: 'CRÍTICA', high: 'ALTA', medium: 'MÉDIA', low: 'BAIXA', none: '-' };
+    const priorityOrder = { critical: 1, high: 2, medium: 3, low: 4, none: 5 };
+    const statusLabels = { false: 'Pendente', true: 'Concluída' };
+
+    const sortedTasks = [...tasks].sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
+    });
+
+    let pendingCount = 0;
+    let completedCount = 0;
+
+    let txt = '#|Status|Descrição|Prioridade\n';
+    txt += '---|------|----------|----------\n';
+
+    sortedTasks.forEach((task, index) => {
+      const num = String(index + 1);
+      const status = statusLabels[task.completed];
+      const priority = priorityLabels[task.priority] || '-';
+      const desc = task.text.replace(/\|/g, ' ').replace(/\n/g, ' ');
+
+      txt += `${num}|${status}|${desc}|${priority}\n`;
+
+      if (task.completed) {
+        completedCount++;
+      } else {
+        pendingCount++;
+      }
+    });
+
+    txt += '\n';
+    txt += `Total: ${tasks.length} tarefas | Pendentes: ${pendingCount} | Concluídas: ${completedCount}\n`;
+
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tarefas_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    elements.btnExport.disabled = false;
+    elements.btnExport.textContent = 'Exportar Tarefas (TXT)';
+    showToast('Tarefas exportadas com sucesso!');
+  }
+
+  function toggleComplete(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      task.completed = !task.completed;
+      task.updatedAt = Date.now();
+      saveTasks();
+      renderTasks();
+      showToast(task.completed ? 'Tarefa concluída!' : 'Tarefa marcada como pendente', task.completed ? 'success' : '');
+    }
+  }
+
+  function setPriority(taskId, priority) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      task.priority = task.priority === priority ? 'none' : priority;
+      task.updatedAt = Date.now();
+      saveTasks();
+      renderTasks();
+      const labels = { critical: 'Crítica', high: 'Alta', medium: 'Média', low: 'Baixa' };
+      const types = { critical: 'error', high: 'warning', medium: 'info', low: 'success', none: 'info' };
+      showToast(task.priority !== 'none' ? `Prioridade: ${labels[task.priority]}` : 'Prioridade removida', types[task.priority] || 'info');
+    }
+  }
+
+  function reorderTasks(fromIndex, toIndex) {
+    const taskToMove = tasks[fromIndex];
+    const targetTask = tasks[toIndex];
+    if (taskToMove && taskToMove.priority && taskToMove.priority !== 'none') {
+      showToast('Reorganize apenas tarefas sem prioridade definida', 'warning');
+      return;
+    }
+    if (targetTask && targetTask.priority && targetTask.priority !== 'none') {
+      showToast('Não mova para posição de tarefa com prioridade', 'warning');
+      return;
+    }
+    const [moved] = tasks.splice(fromIndex, 1);
+    tasks.splice(toIndex, 0, moved);
+    saveTasks();
+    renderTasks();
+  }
+
+  function handleDrop(event) {
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    const target = event.target;
+    const isFromInput = target === elements.taskInput || target.tagName === 'TEXTAREA' || target.classList.contains('task-text-input');
+    if (isFromInput) return;
+
+    event.preventDefault();
+
+    const file = files[0];
+    if (file.type.startsWith('image/')) {
+      processImage(file, !!selectedId);
+    }
+  }
+
+  function startEditing(taskId) {
+    editingId = taskId;
+    selectedId = taskId;
+    saveTasks();
+    renderTasks();
+    setTimeout(() => {
+      const textarea = document.querySelector('.task-text-input');
+      if (textarea) {
+        const task = tasks.find(t => t.id === taskId);
+        textarea.focus();
+        if (task && task.text !== IMAGE_PLACEHOLDER) {
+          textarea.select();
+        }
+      }
+    }, 0);
+  }
+
+  function saveEditing(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const textarea = document.querySelector('.task-text-input');
+    if (textarea) {
+      const newText = textarea.value.trim();
+      if (newText) {
+        task.text = newText;
+        task.updatedAt = Date.now();
+        saveTasks();
+        showToast('Edição salva!', 'success');
+      } else if (task.images && task.images.length > 0) {
+        task.text = IMAGE_PLACEHOLDER;
+        task.updatedAt = Date.now();
+        saveTasks();
+      }
+    }
+    editingId = null;
+    renderTasks();
+  }
+
+  function cancelEditing() {
+    editingId = null;
+    renderTasks();
+  }
+
+  function deleteTask(taskId) {
+    tasks = tasks.filter(t => t.id !== taskId);
+    if (selectedId === taskId) {
+      selectedId = null;
+    }
+    saveTasks();
+    renderTasks();
+    showToast('Tarefa excluída!', 'warning');
+  }
+
+  function confirmDeleteTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    const taskText = task ? (task.text.length > 50 ? task.text.slice(0, 50) + '...' : task.text) : 'esta tarefa';
+    pendingDeleteId = taskId;
+    elements.confirmMessage.textContent = `Excluir "${taskText}"?`;
+    elements.confirmModal.classList.add('visible');
+  }
+
+  function executeDelete() {
+    if (pendingDeleteId) {
+      tasks = tasks.filter(t => t.id !== pendingDeleteId);
+      if (selectedId === pendingDeleteId) {
+        selectedId = null;
+      }
+      saveTasks();
+      renderTasks();
+      showToast('Tarefa excluída!', 'warning');
+      pendingDeleteId = null;
+    }
+    closeConfirmModal();
+  }
+
+  function closeConfirmModal() {
+    elements.confirmModal.classList.remove('visible');
+    pendingDeleteId = null;
+  }
+
+  function importTasksFromTxt(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    elements.btnImport.disabled = true;
+    elements.btnImport.textContent = 'Importando...';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      importFromContent(e.target.result, false);
+      elements.btnImport.disabled = false;
+      elements.btnImport.textContent = 'Importar Tarefas (TXT)';
+    };
+    reader.onerror = function() {
+      showToast('Erro ao ler arquivo', 'error');
+      elements.btnImport.disabled = false;
+      elements.btnImport.textContent = 'Importar Tarefas (TXT)';
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function importFromContent(content, isRestore = false) {
+    const lines = content.split('\n');
+    const priorityMap = { 'CRÍTICA': 'critical', 'ALTA': 'high', 'MÉDIA': 'medium', 'BAIXA': 'low', '-': 'none' };
+    const statusMap = { 'Pendente': false, 'Concluída': true, 'Pendentes': false, 'Concluídas': true };
+    const importedTasks = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('═') || trimmed.startsWith('─') || trimmed.startsWith('Total:')) continue;
+      if (trimmed.startsWith('#') || trimmed.startsWith('---')) continue;
+
+      let parts = trimmed.split('|');
+      if (parts.length >= 4) {
+        const num = parts[0].trim();
+        const statusStr = parts[1].trim();
+        let desc = parts.slice(2, parts.length - 1).join('|').trim();
+        const priorStr = parts[parts.length - 1].trim();
+
+        if (num && !isNaN(parseInt(num))) {
+          importedTasks.push({
+            id: generateId(),
+            text: desc,
+            completed: statusMap[statusStr] || false,
+            images: [],
+            priority: priorityMap[priorStr] || 'none',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+        }
+      }
+    }
+
+    if (importedTasks.length === 0) {
+      if (!isRestore) {
+        showToast('Nenhuma tarefa encontrada', 'error');
+      }
+      return;
+    }
+
+    tasks = importedTasks.reverse();
+    saveTasksSync();
+    renderTasks();
+    showToast(isRestore ? `${tasks.length} tarefas restauradas do backup!` : `${tasks.length} tarefas importadas!`, 'success');
+  }
+
+  async function handlePaste(event) {
+    const target = event.target;
+    const isFromInput = target === elements.taskInput || target.tagName === 'TEXTAREA' || target.classList.contains('task-text-input');
+    if (isFromInput) return;
+
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        const blob = item.getAsFile();
+        if (blob) {
+          await processImage(blob, true);
+        }
+        return;
+      }
+    }
+
+    const text = event.clipboardData?.getData('text');
+    if (text && text.trim()) {
+      event.preventDefault();
+      createTask(text.trim());
+    }
+  }
+
+  async function processImage(blob, attachToSelected = false) {
+    if (blob.size > 500 * 1024) {
+      showToast('Imagem muito grande (máx 500KB)');
+      return;
+    }
+
+    try {
+      const base64 = await compressImage(blob);
+
+      if (attachToSelected && selectedId) {
+        const task = tasks.find(t => t.id === selectedId);
+        if (task) {
+          if (!task.images) task.images = [];
+          task.images.push(base64);
+          task.updatedAt = Date.now();
+          saveTasks();
+          renderTasks();
+          showToast('Imagem anexada à tarefa');
+          return;
+        }
+      }
+
+      createTask('', base64);
+    } catch (e) {
+      console.error('Erro ao processar imagem:', e);
+      showToast('Erro ao processar imagem');
+    }
+  }
+
+  function compressImage(blob) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_IMAGE_SIZE || height > MAX_IMAGE_SIZE) {
+          if (width > height) {
+            height = (height / width) * MAX_IMAGE_SIZE;
+            width = MAX_IMAGE_SIZE;
+          } else {
+            width = (width / height) * MAX_IMAGE_SIZE;
+            height = MAX_IMAGE_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(blob);
+    });
+  }
+
+  function openModal(src) {
+    elements.modalImage.src = src;
+    elements.imageModal.classList.add('visible');
+  }
+
+  function closeModal() {
+    elements.imageModal.classList.remove('visible');
+    elements.modalImage.src = '';
+  }
+
+  function deleteTaskImage(taskId, imageIndex) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && task.images && task.images.length > 0) {
+      const idx = typeof imageIndex === 'number' ? imageIndex : task.images.length - 1;
+      if (idx >= 0 && idx < task.images.length) {
+        task.images.splice(idx, 1);
+        task.updatedAt = Date.now();
+        saveTasks();
+        renderTasks();
+        showToast('Imagem removida!', 'info');
+      }
+    }
+  }
+
+  function addImageToTask(taskId, base64) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      if (!task.images) task.images = [];
+      task.images.push(base64);
+      task.updatedAt = Date.now();
+      if (saveTasks()) {
+        renderTasks();
+        showToast('Imagem adicionada!', 'success');
+      } else {
+        task.images.pop();
+        showToast('Limite de armazenamento excedido. Não é possível adicionar mais imagens.', 'error');
+      }
+    }
+  }
+
+  function addTaskByEnter(event) {
+    if (event.key === 'Enter' && !event.isComposing) {
+      event.preventDefault();
+      const text = elements.taskInput.value.trim();
+      if (text) {
+        addTask();
+      }
+    }
+  }
+
+  function init() {
+    loadTasks();
+    renderTasks();
+
+    elements.taskInput.addEventListener('keydown', addTaskByEnter);
+    document.addEventListener('paste', handlePaste);
+    document.addEventListener('dragover', (e) => e.preventDefault());
+    document.addEventListener('drop', handleDrop);
+    document.addEventListener('click', (e) => {
+      const clickedOnTask = e.target.closest('.task-item');
+      const clickedOnInput = e.target === elements.taskInput;
+      const clickedOnEditing = e.target.closest('.task-text-input');
+      const modalVisible = elements.confirmModal.classList.contains('visible') || elements.imageModal.classList.contains('visible');
+
+      if (modalVisible) return;
+      if (editingId && clickedOnEditing) return;
+      if (editingId) {
+        if (!clickedOnTask && !clickedOnInput && !clickedOnEditing) {
+          saveEditing(editingId);
+        }
+      }
+      if (selectedId && !clickedOnTask && !clickedOnInput && !clickedOnEditing) {
+        clearSelection();
+      }
+    });
+    elements.taskList.addEventListener('click', (e) => {
+      if (e.target === elements.taskList) {
+        clearSelection();
+      }
+    });
+    elements.modalClose.addEventListener('click', closeModal);
+    elements.imageModal.addEventListener('click', (e) => {
+      if (e.target === elements.imageModal) {
+        closeModal();
+      }
+    });
+    elements.confirmCancel.addEventListener('click', closeConfirmModal);
+    elements.confirmDelete.addEventListener('click', executeDelete);
+    elements.confirmModal.addEventListener('click', (e) => {
+      if (e.target === elements.confirmModal) {
+        closeConfirmModal();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (elements.imageModal.classList.contains('visible')) {
+          closeModal();
+        }
+        if (elements.confirmModal.classList.contains('visible')) {
+          closeConfirmModal();
+        }
+      }
+    });
+    elements.btnExport.addEventListener('click', exportTasksToTxt);
+    elements.btnImport.addEventListener('click', () => elements.fileImport.click());
+    elements.fileImport.addEventListener('change', importTasksFromTxt);
+    elements.btnClearFilter.addEventListener('click', () => {
+      currentFilter = null;
+      saveTasksSync();
+      renderTasks();
+      showToast('Filtro removido', 'info');
+    });
+    elements.counterNone.addEventListener('click', () => setFilter('none'));
+    elements.counterCritical.addEventListener('click', () => setFilter('critical'));
+    elements.counterHigh.addEventListener('click', () => setFilter('high'));
+    elements.counterMedium.addEventListener('click', () => setFilter('medium'));
+    elements.counterLow.addEventListener('click', () => setFilter('low'));
+    elements.counterPending.addEventListener('click', () => setFilter('pending'));
+    elements.counterCompleted.addEventListener('click', () => setFilter('completed'));
+
+    // Search bar
+    elements.searchInput.addEventListener('input', (e) => performSearch(e.target.value));
+    elements.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSearchBar();
+      if (e.key === 'ArrowDown') { e.preventDefault(); navigateSearchResults('down'); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); navigateSearchResults('up'); }
+      if (e.key === 'Enter' && searchResults.length > 0) {
+        e.preventDefault();
+        navigateSearchResults('down');
+      }
+    });
+    elements.searchClose.addEventListener('click', closeSearchBar);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        toggleSearchBar();
+      }
+      if (e.key === 'Delete' && selectedId && !searchBarVisible) {
+        e.preventDefault();
+        confirmDeleteTask(selectedId);
+      }
+      // E para confirmar exclusão quando modal aberto
+      if (e.key === 'e' || e.key === 'E') {
+        if (elements.confirmModal.classList.contains('visible')) {
+          e.preventDefault();
+          executeDelete();
+        }
+      }
+      if (e.key === 'Escape') {
+        if (searchBarVisible) closeSearchBar();
+        if (elements.confirmModal.classList.contains('visible')) closeConfirmModal();
+        if (elements.imageModal.classList.contains('visible')) closeModal();
+      }
+      // Insert foca no campo de nova tarefa
+      if (e.key === 'Insert') {
+        e.preventDefault();
+        elements.taskInput.focus();
+      }
+      // Setas para navegar entre tarefas (quando busca não está ativa)
+      if (!searchBarVisible && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault();
+        navigateTasks(e.key === 'ArrowDown' ? 1 : -1);
+      }
+    });
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    renderTasks();
+    saveTasksSync();
+    const labels = { none: 'sem prioridade', pending: 'pendentes', completed: 'concluídas', critical: 'crítica', high: 'alta', medium: 'média', low: 'baixa' };
+    showToast(`Filtrando: ${labels[filter] || filter}`, 'info');
+  }
+
+  function toggleSearchBar() {
+    if (searchBarVisible) {
+      closeSearchBar();
+    } else {
+      openSearchBar();
+    }
+  }
+
+  function openSearchBar() {
+    currentFilter = null;
+    searchBarVisible = true;
+    elements.searchBar.classList.add('visible');
+    elements.searchInput.value = '';
+    elements.searchInput.focus();
+    renderTasks();
+  }
+
+  function closeSearchBar() {
+    searchBarVisible = false;
+    elements.searchBar.classList.remove('visible');
+    elements.searchInput.value = '';
+    elements.searchCount.textContent = '';
+    searchResults = [];
+    renderTasks();
+  }
+
+  function performSearch(query) {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) {
+      elements.searchCount.textContent = '';
+      renderTasks();
+      return;
+    }
+
+    const words = normalizedQuery.split(/\s+/);
+    const filtered = tasks.filter(task => {
+      const text = task.text.toLowerCase();
+      return words.every(word => text.includes(word));
+    });
+
+    searchResults = filtered.map(t => t.id);
+    renderTasks();
+
+    // Atualizar contador
+    if (searchResults.length > 0) {
+      elements.searchCount.textContent = `1 de ${searchResults.length}`;
+      // Selecionar primeiro resultado
+      selectTask(searchResults[0]);
+    } else {
+      elements.searchCount.textContent = 'Nenhum';
+    }
+  }
+
+  function navigateTasks(direction) {
+    if (sortedTaskIds.length === 0) return;
+
+    const currentIndex = selectedId ? sortedTaskIds.indexOf(selectedId) : -1;
+    let newIndex;
+
+    if (direction === 1) {
+      newIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % sortedTaskIds.length;
+    } else {
+      newIndex = currentIndex <= 0 ? sortedTaskIds.length - 1 : currentIndex - 1;
+    }
+
+    const newId = sortedTaskIds[newIndex];
+    if (newId && newId !== selectedId) {
+      selectedId = newId;
+      saveTasksSync();
+      renderTasks();
+      const el = document.querySelector(`[data-task-id="${newId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+
+  function navigateSearchResults(direction) {
+    if (searchResults.length === 0) return;
+
+    const currentIndex = selectedId ? searchResults.indexOf(selectedId) : -1;
+    let newIndex;
+
+    if (direction === 'down') {
+      newIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % searchResults.length;
+    } else {
+      newIndex = currentIndex <= 0 ? searchResults.length - 1 : currentIndex - 1;
+    }
+
+    const newId = searchResults[newIndex];
+    if (newId) {
+      selectTask(newId);
+      const el = document.querySelector(`[data-task-id="${newId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Atualizar contador
+      elements.searchCount.textContent = `${newIndex + 1} de ${searchResults.length}`;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
+  console.log('ToDoList initialized - CTRL+B para buscar, DEL para excluir');
+})();

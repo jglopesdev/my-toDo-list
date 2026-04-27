@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha lista de tarefas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="title">Minha lista de tarefas</h1>
+      <div class="counters">
+        <span class="counter counter-total" id="counterTotal">0 tarefas</span>
+        <span class="counter counter-pending" id="counterPending">0 pendentes</span>
+        <span class="counter counter-completed" id="counterCompleted">0 concluídas</span>
+        <span class="counter counter-none" id="counterNone">0 sem prioridade</span>
+        <span class="counter counter-critical" id="counterCritical">0 crítica</span>
+        <span class="counter counter-high" id="counterHigh">0 alta</span>
+        <span class="counter counter-medium" id="counterMedium">0 média</span>
+        <span class="counter counter-low" id="counterLow">0 baixa</span>
+        <button class="btn-clear-filter" id="btnClearFilter">Limpar filtro</button>
+      </div>
+      <input
+        type="text"
+        id="taskInput"
+        class="task-input"
+        placeholder="Digite uma nova tarefa..."
+        autocomplete="off"
+      >
+    </header>
+
+    <main class="task-list" id="taskList"></main>
+
+    <div class="empty-state" id="emptyState">
+      <p>Nenhuma tarefa ainda.</p>
+      <p class="hint">Digite uma tarefa acima ou cole uma imagem (Ctrl+V)</p>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-top">
+        <img src="jglopes.png" alt="Logo" class="footer-logo">
+        <button class="btn-export" id="btnExport">Exportar Tarefas (TXT)</button>
+        <button class="btn-export" id="btnImport">Importar Tarefas (TXT)</button>
+        <input type="file" id="fileImport" accept=".txt" style="display:none;">
+      </div>
+      <small>Suas tarefas são salvas no navegador. Se limpar o cache, elas serão excluídas.</small>
+      <div class="shortcuts">
+        <span title="Nova tarefa"><kbd>INSERT</kbd> Nova tarefa</span>
+        <span title="Buscar"><kbd>CTRL</kbd>+<kbd>B</kbd> Buscar</span>
+        <span title="Excluir"><kbd>DEL</kbd> Excluir</span>
+        <span title="Navegar"><kbd>↑</kbd><kbd>↓</kbd> Mover</span>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal" id="imageModal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <img class="modal-image" id="modalImage" src="" alt="Imagem ampliada">
+  </div>
+
+  <div class="confirm-modal" id="confirmModal">
+    <div class="confirm-content">
+      <p class="confirm-message" id="confirmMessage">Tem certeza que deseja excluir?</p>
+      <div class="confirm-actions">
+        <button class="btn-confirm btn-cancel" id="confirmCancel">Cancelar</button>
+        <button class="btn-confirm btn-delete-confirm" id="confirmDelete">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-bar" id="searchBar">
+    <div class="search-input-wrapper">
+      <input type="text" class="search-input" id="searchInput" placeholder="Digite para buscar..." autocomplete="off">
+      <span class="search-icon">🔍</span>
+      <button class="search-close" id="searchClose" title="Fechar Busca">&times;</button>
+      <span class="search-count" id="searchCount"></span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
