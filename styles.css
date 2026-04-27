@@ -339,6 +339,10 @@ body {
   opacity: 1;
 }
 
+.drag-handle.hidden {
+  display: none;
+}
+
 .drag-handle:active {
   cursor: grabbing;
 }

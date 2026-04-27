@@ -376,10 +376,13 @@ const elements = {
       </div>
     `;
 
+    const hasPriority = task.priority !== 'none';
+    const dragHandleClass = hasPriority ? 'drag-handle hidden' : 'drag-handle';
+
     if (isEditing) {
       return `
         <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
-          <span class="drag-handle">⋮⋮</span>
+          <span class="${dragHandleClass}">⋮⋮</span>
           <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
           <div class="task-content">
             <textarea class="task-text-input" data-task-id="${task.id}">${escapeHtml(task.text)}</textarea>
@@ -395,7 +398,7 @@ const elements = {
 
     return `
       <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
-        <span class="drag-handle">⋮⋮</span>
+        <span class="${dragHandleClass}">⋮⋮</span>
         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
         <div class="task-content">
           <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${displayText}</div>
@@ -549,6 +552,12 @@ const elements = {
       });
 
       item.addEventListener('dragstart', (e) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (task && task.priority && task.priority !== 'none') {
+          e.preventDefault();
+          showToast('Reorganize apenas tarefas sem prioridade definida', 'warning');
+          return;
+        }
         item.classList.add('dragging');
         e.dataTransfer.setData('text/plain', taskId);
         e.dataTransfer.effectAllowed = 'move';
@@ -1247,21 +1256,8 @@ const elements = {
       elements.confirmDeleteAllModal.classList.add('visible');
       elements.confirmDeleteAllInput.value = '';
       elements.confirmDeleteAllBtn.disabled = true;
+      elements.confirmCountdown.classList.remove('visible');
       elements.confirmCountdown.textContent = '';
-      let countdown = 10;
-      elements.confirmCountdown.classList.add('visible');
-      elements.confirmCountdown.textContent = `A exclusão será confirmada em ${countdown}s`;
-      clearInterval(deleteAllCountdownTimer);
-      deleteAllCountdownTimer = setInterval(() => {
-        countdown--;
-        elements.confirmCountdown.textContent = `A exclusão será confirmada em ${countdown}s`;
-        if (countdown <= 0) {
-          clearInterval(deleteAllCountdownTimer);
-          elements.confirmDeleteAllModal.classList.remove('visible');
-          elements.confirmCountdown.classList.remove('visible');
-          showToast('Exclusão em massa cancelada por segurança', 'info');
-        }
-      }, 1000);
     });
 
     // Ripple effect nos botões de exportar/importar
@@ -1273,34 +1269,49 @@ const elements = {
       elements.confirmDeleteAllBtn.disabled = value !== 'tenho certeza';
     });
     elements.confirmDeleteAllBtn.addEventListener('click', () => {
+      elements.confirmDeleteAllBtn.disabled = true;
+      let countdown = 5;
+      elements.confirmCountdown.classList.add('visible');
+      elements.confirmCountdown.textContent = `Excluindo em ${countdown}s (clique em Cancelar para desistir)`;
+      elements.confirmDeleteAllCancel.textContent = 'Cancelar';
       clearInterval(deleteAllCountdownTimer);
-      elements.confirmCountdown.classList.remove('visible');
-      tasks = [];
-      selectedId = null;
-      editingId = null;
-      currentFilter = null;
-      searchResults = [];
-      searchBarVisible = false;
-      elements.searchBar.classList.remove('visible');
-      elements.searchBar.style.display = 'none';
-      elements.searchInput.value = '';
-      elements.searchInput.blur();
-      elements.searchCount.textContent = '';
-      elements.btnClearFilter.style.display = 'none';
-      saveTasksSync();
-      renderTasks();
-      elements.confirmDeleteAllModal.classList.remove('visible');
-      showToast('Todas as tarefas foram excluídas!', 'warning');
+      deleteAllCountdownTimer = setInterval(() => {
+        countdown--;
+        elements.confirmCountdown.textContent = `Excluindo em ${countdown}s (clique em Cancelar para desistir)`;
+        if (countdown <= 0) {
+          clearInterval(deleteAllCountdownTimer);
+          elements.confirmCountdown.classList.remove('visible');
+          elements.confirmDeleteAllCancel.textContent = 'Cancelar';
+          tasks = [];
+          selectedId = null;
+          editingId = null;
+          currentFilter = null;
+          searchResults = [];
+          searchBarVisible = false;
+          elements.searchBar.classList.remove('visible');
+          elements.searchBar.style.display = 'none';
+          elements.searchInput.value = '';
+          elements.searchInput.blur();
+          elements.searchCount.textContent = '';
+          elements.btnClearFilter.style.display = 'none';
+          saveTasksSync();
+          renderTasks();
+          elements.confirmDeleteAllModal.classList.remove('visible');
+          showToast('Todas as tarefas foram excluídas!', 'warning');
+        }
+      }, 1000);
     });
     elements.confirmDeleteAllCancel.addEventListener('click', () => {
       clearInterval(deleteAllCountdownTimer);
       elements.confirmCountdown.classList.remove('visible');
+      elements.confirmDeleteAllCancel.textContent = 'Cancelar';
       elements.confirmDeleteAllModal.classList.remove('visible');
     });
     elements.confirmDeleteAllModal.addEventListener('click', (e) => {
       if (e.target === elements.confirmDeleteAllModal) {
         clearInterval(deleteAllCountdownTimer);
         elements.confirmCountdown.classList.remove('visible');
+        elements.confirmDeleteAllCancel.textContent = 'Cancelar';
         elements.confirmDeleteAllModal.classList.remove('visible');
       }
     });
