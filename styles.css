@@ -494,6 +494,22 @@ body {
   color: #fff;
 }
 
+.btn-expand {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  margin-top: 4px;
+  transition: opacity 0.15s;
+}
+
+.btn-expand:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
 .empty-state .hint {
   font-size: 0.875rem;
   margin-top: var(--spacing-sm);

@@ -347,6 +347,10 @@ const elements = {
     }
 
     const displayText = isImageOnlyTask ? IMAGE_PLACEHOLDER : linkedText;
+    const isLongText = !isImageOnlyTask && task.text.length > 200;
+    const shortText = isLongText ? linkedText.substring(0, 200) + '...' : linkedText;
+    const textToRender = isLongText ? shortText : linkedText;
+    const longTextId = 'long-' + task.id;
     const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
 
     let imageHtml = '';
@@ -401,7 +405,8 @@ const elements = {
         <span class="${dragHandleClass}">⋮⋮</span>
         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
         <div class="task-content">
-          <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${displayText}</div>
+          <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${isLongText ? `<span class="task-text-short" id="${longTextId}">${textToRender}</span><span class="task-text-full" id="${longTextId}-full" style="display:none">${linkedText}</span>` : textToRender}</div>
+          ${isLongText ? '<button class="btn-expand" data-task-id="' + task.id + '">Ver mais...</button>' : ''}
           ${imageHtml}
         </div>
         ${priorityButtons}
@@ -510,6 +515,21 @@ const elements = {
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           confirmDeleteTask(taskId);
+        });
+      }
+
+      const expandBtn = item.querySelector('.btn-expand');
+      if (expandBtn) {
+        expandBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const shortEl = item.querySelector('.task-text-short');
+          const fullEl = item.querySelector('.task-text-full');
+          if (shortEl && fullEl) {
+            const isExpanded = fullEl.style.display !== 'none';
+            shortEl.style.display = isExpanded ? '' : 'none';
+            fullEl.style.display = isExpanded ? 'none' : '';
+            expandBtn.textContent = isExpanded ? 'Ver mais...' : 'Ver menos';
+          }
         });
       }
 
