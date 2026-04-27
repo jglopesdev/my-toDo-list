@@ -45,7 +45,8 @@ let searchBarVisible = false;
     searchInput: document.getElementById('searchInput'),
     searchClose: document.getElementById('searchClose'),
     searchCount: document.getElementById('searchCount'),
-    themeToggle: document.getElementById('themeToggle')
+    themeToggle: document.getElementById('themeToggle'),
+    footerLogo: document.getElementById('footerLogo')
   };
 
   let pendingDeleteId = null;
@@ -1094,6 +1095,7 @@ let searchBarVisible = false;
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', currentTheme);
     elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    elements.footerLogo.src = currentTheme === 'dark' ? 'jglopes.png' : 'jglopes_bg.png';
     localStorage.setItem('todolist_theme', currentTheme);
   }
 
@@ -1103,6 +1105,7 @@ let searchBarVisible = false;
       currentTheme = saved;
       document.documentElement.setAttribute('data-theme', currentTheme);
       elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+      elements.footerLogo.src = currentTheme === 'dark' ? 'jglopes.png' : 'jglopes_bg.png';
     }
   }
 
