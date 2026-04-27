@@ -347,8 +347,9 @@ const elements = {
     }
 
     const displayText = isImageOnlyTask ? IMAGE_PLACEHOLDER : linkedText;
-    const isLongText = !isImageOnlyTask && task.text.length > 200;
-    const shortText = isLongText ? linkedText.substring(0, 200) + '...' : linkedText;
+    const maxLen = window.innerWidth <= 480 ? 160 : 300;
+    const isLongText = !isImageOnlyTask && task.text.length > maxLen;
+    const shortText = isLongText ? linkedText.substring(0, maxLen) + '...' : linkedText;
     const textToRender = isLongText ? shortText : linkedText;
     const longTextId = 'long-' + task.id;
     const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
