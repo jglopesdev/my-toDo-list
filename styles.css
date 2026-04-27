@@ -69,22 +69,21 @@ body {
   margin-bottom: var(--spacing-xl);
 }
 
+.header {
+  position: relative;
+}
+
 .title-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-  letter-spacing: -0.5px;
 }
 
 .theme-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   background: transparent;
   border: none;
   font-size: 1.5rem;
@@ -97,7 +96,7 @@ body {
 
 .theme-toggle:hover {
   opacity: 1;
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .counters {
