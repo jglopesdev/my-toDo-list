@@ -1069,6 +1069,11 @@ let tasks = [];
       setTimeout(() => {
         elements.themeToggle.style.transform = 'translateY(-50%)';
       }, 300);
+
+      // Trocar tema
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      elements.themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
     });
 
     // Search bar
