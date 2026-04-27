@@ -1007,7 +1007,7 @@ let tasks = [];
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'b') {
+      if (e.ctrlKey && e.key === 'b' && window.innerWidth > 480) {
         e.preventDefault();
         toggleSearchBar();
       }
