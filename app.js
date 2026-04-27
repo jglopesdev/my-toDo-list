@@ -59,6 +59,7 @@ let tasks = [];
   };
 
   let pendingDeleteId = null;
+  let previousCounts = { total: 0, pending: 0, completed: 0 };
 
   function loadTasks() {
     try {
@@ -129,6 +130,28 @@ let tasks = [];
     return Date.now().toString() + '-' + (++idCounter);
   }
 
+  function animateCounter(element) {
+    element.classList.remove('flash');
+    void element.offsetWidth;
+    element.classList.add('flash');
+    setTimeout(() => {
+      element.classList.remove('flash');
+    }, 500);
+  }
+
+  function createRipple(event) {
+    const button = event.currentTarget;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = event.clientX - rect.left - size / 2 + 'px';
+    ripple.style.top = event.clientY - rect.top - size / 2 + 'px';
+    button.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+
   function showToast(message, type = '') {
     elements.toast.textContent = message;
     elements.toast.className = 'toast visible ' + type;
@@ -158,6 +181,18 @@ let tasks = [];
     elements.counterHigh.textContent = `${highCount} alta`;
     elements.counterMedium.textContent = `${mediumCount} média`;
     elements.counterLow.textContent = `${lowCount} baixa`;
+
+    // Animar contadores que mudaram
+    if (previousCounts.total !== totalCount) {
+      animateCounter(elements.counterTotal);
+    }
+    if (previousCounts.pending !== pendingCount) {
+      animateCounter(elements.counterPending);
+    }
+    if (previousCounts.completed !== completedCount) {
+      animateCounter(elements.counterCompleted);
+    }
+    previousCounts = { total: totalCount, pending: pendingCount, completed: completedCount };
 
     elements.btnClearFilter.style.display = currentFilter ? 'inline-block' : 'none';
 
@@ -440,10 +475,11 @@ let tasks = [];
 
     renderTasks();
     selectTask(task.id);
-    
-    // Scroll até a tarefa criada
+
+    // Scroll até a tarefa criada com animação
     const taskEl = document.querySelector(`[data-task-id="${task.id}"]`);
     if (taskEl) {
+      taskEl.classList.add('task-item-enter');
       taskEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -636,13 +672,27 @@ let tasks = [];
   }
 
   function deleteTask(taskId) {
-    tasks = tasks.filter(t => t.id !== taskId);
-    if (selectedId === taskId) {
-      selectedId = null;
+    const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (taskEl) {
+      taskEl.classList.add('task-item-exit');
+      setTimeout(() => {
+        tasks = tasks.filter(t => t.id !== taskId);
+        if (selectedId === taskId) {
+          selectedId = null;
+        }
+        saveTasks();
+        renderTasks();
+        showToast('Tarefa excluída!', 'warning');
+      }, 280);
+    } else {
+      tasks = tasks.filter(t => t.id !== taskId);
+      if (selectedId === taskId) {
+        selectedId = null;
+      }
+      saveTasks();
+      renderTasks();
+      showToast('Tarefa excluída!', 'warning');
     }
-    saveTasks();
-    renderTasks();
-    showToast('Tarefa excluída!', 'warning');
   }
 
   function confirmDeleteTask(taskId) {
@@ -655,14 +705,29 @@ let tasks = [];
 
   function executeDelete() {
     if (pendingDeleteId) {
-      tasks = tasks.filter(t => t.id !== pendingDeleteId);
-      if (selectedId === pendingDeleteId) {
-        selectedId = null;
+      const taskEl = document.querySelector(`[data-task-id="${pendingDeleteId}"]`);
+      if (taskEl) {
+        taskEl.classList.add('task-item-exit');
+        setTimeout(() => {
+          tasks = tasks.filter(t => t.id !== pendingDeleteId);
+          if (selectedId === pendingDeleteId) {
+            selectedId = null;
+          }
+          saveTasks();
+          renderTasks();
+          showToast('Tarefa excluída!', 'warning');
+          pendingDeleteId = null;
+        }, 280);
+      } else {
+        tasks = tasks.filter(t => t.id !== pendingDeleteId);
+        if (selectedId === pendingDeleteId) {
+          selectedId = null;
+        }
+        saveTasks();
+        renderTasks();
+        showToast('Tarefa excluída!', 'warning');
+        pendingDeleteId = null;
       }
-      saveTasks();
-      renderTasks();
-      showToast('Tarefa excluída!', 'warning');
-      pendingDeleteId = null;
     }
     closeConfirmModal();
   }
@@ -949,6 +1014,11 @@ let tasks = [];
       elements.confirmDeleteAllInput.value = '';
       elements.confirmDeleteAllBtn.disabled = true;
     });
+
+    // Ripple effect nos botões de exportar/importar
+    document.querySelectorAll('.btn-export, .btn-confirm').forEach(btn => {
+      btn.addEventListener('click', createRipple);
+    });
     elements.confirmDeleteAllInput.addEventListener('input', (e) => {
       const value = e.target.value.trim().toLowerCase();
       elements.confirmDeleteAllBtn.disabled = value !== 'tenho certeza';
@@ -992,6 +1062,14 @@ let tasks = [];
     elements.counterLow.addEventListener('click', () => setFilter('low'));
     elements.counterPending.addEventListener('click', () => setFilter('pending'));
     elements.counterCompleted.addEventListener('click', () => setFilter('completed'));
+
+    // Theme toggle com animação
+    elements.themeToggle.addEventListener('click', () => {
+      elements.themeToggle.style.transform = 'translateY(-50%) rotate(360deg)';
+      setTimeout(() => {
+        elements.themeToggle.style.transform = 'translateY(-50%)';
+      }, 300);
+    });
 
     // Search bar
     elements.searchInput.addEventListener('input', (e) => performSearch(e.target.value));

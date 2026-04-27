@@ -1051,3 +1051,287 @@ body {
 .task-item.search-highlight {
   box-shadow: 0 0 0 2px var(--primary);
 }
+
+/* ==================== ANIMAÇÕES ==================== */
+
+/* Transição global para tema */
+body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text {
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Animação ao criar tarefa */
+@keyframes taskSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.task-item-enter {
+  animation: taskSlideIn 0.3s ease-out forwards;
+}
+
+/* Animação ao excluir tarefa */
+@keyframes taskFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    max-height: 200px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+    max-height: 0;
+    padding: 0;
+    margin-bottom: 0;
+  }
+}
+
+.task-item-exit {
+  animation: taskFadeOut 0.3s ease-out forwards;
+}
+
+/* Bounce no checkbox */
+@keyframes checkBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  75% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.task-checkbox:checked {
+  animation: checkBounce 0.35s ease;
+}
+
+/* Glow pulsante no input */
+@keyframes inputGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.25), 0 0 20px rgba(187, 134, 252, 0.15);
+  }
+}
+
+.task-input:focus {
+  animation: inputGlow 2s ease-in-out infinite;
+}
+
+/* Pulse nos botões de prioridade */
+@keyframes priorityPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.task-priority-btn.active {
+  animation: priorityPulse 0.3s ease;
+}
+
+/* Flash nos contadores */
+@keyframes counterFlash {
+  0% { background: var(--primary); color: #fff; transform: scale(1.1); }
+  100% { background: var(--surface); color: var(--text-muted); transform: scale(1); }
+}
+
+.counter.flash {
+  animation: counterFlash 0.5s ease;
+}
+
+/* Modal com escala + fade */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal.visible,
+.confirm-modal.visible {
+  animation: modalFadeIn 0.25s ease forwards;
+}
+
+/* Shake para erros no toast */
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.toast.error {
+  animation: shakeX 0.4s ease;
+}
+
+/* Bounce para toast success */
+@keyframes bounceIn {
+  0% { transform: translateX(calc(100% + 50px)); opacity: 0; }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.toast.success {
+  animation: bounceIn 0.4s ease forwards;
+}
+
+/* Drag and drop */
+.task-item.dragging {
+  opacity: 0.35;
+  transform: scale(0.98) rotate(1deg);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.task-item.drag-over {
+  border-top: 3px solid var(--primary);
+  margin-top: 12px;
+  transition: margin 0.2s ease, border-color 0.2s;
+}
+
+/* Completar tarefa - riscar com animação */
+.task-item.completed .task-text {
+  animation: strikeThrough 0.4s ease forwards;
+}
+
+@keyframes strikeThrough {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+
+/* Hover sutil nos itens */
+.task-item {
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-item:hover {
+  transform: translateX(2px);
+}
+
+/* Botões com hover suave */
+.btn-export:hover,
+.btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-export:active,
+.btn-confirm:active {
+  transform: translateY(0);
+}
+
+/* Imagem com hover zoom */
+.task-image {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Search bar slide */
+@keyframes searchSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-bar.visible {
+  animation: searchSlideIn 0.25s ease forwards;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Ripple effect nos botões */
+.btn-export, .btn-confirm {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-export .ripple,
+.btn-confirm .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Loading spinner para operações */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Skeleton loading para tarefas */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.task-skeleton {
+  background: linear-gradient(90deg, var(--surface) 0%, var(--surface-hover) 50%, var(--surface) 100%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+
+.task-skeleton .skeleton-line {
+  height: 16px;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+.task-skeleton .skeleton-line:nth-child(1) { width: 80%; }
+.task-skeleton .skeleton-line:nth-child(2) { width: 60%; }
