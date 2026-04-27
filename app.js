@@ -676,6 +676,7 @@ let tasks = [];
     if (taskEl) {
       taskEl.classList.add('task-item-exit');
       setTimeout(() => {
+        taskEl.remove();
         tasks = tasks.filter(t => t.id !== taskId);
         if (selectedId === taskId) {
           selectedId = null;
@@ -683,7 +684,7 @@ let tasks = [];
         saveTasks();
         renderTasks();
         showToast('Tarefa excluída!', 'warning');
-      }, 280);
+      }, 300);
     } else {
       tasks = tasks.filter(t => t.id !== taskId);
       if (selectedId === taskId) {
@@ -704,23 +705,25 @@ let tasks = [];
   }
 
   function executeDelete() {
-    if (pendingDeleteId) {
-      const taskEl = document.querySelector(`[data-task-id="${pendingDeleteId}"]`);
+    const taskIdToDelete = pendingDeleteId;
+    if (taskIdToDelete) {
+      const taskEl = document.querySelector(`[data-task-id="${taskIdToDelete}"]`);
       if (taskEl) {
         taskEl.classList.add('task-item-exit');
         setTimeout(() => {
-          tasks = tasks.filter(t => t.id !== pendingDeleteId);
-          if (selectedId === pendingDeleteId) {
+          taskEl.remove();
+          tasks = tasks.filter(t => t.id !== taskIdToDelete);
+          if (selectedId === taskIdToDelete) {
             selectedId = null;
           }
           saveTasks();
           renderTasks();
           showToast('Tarefa excluída!', 'warning');
           pendingDeleteId = null;
-        }, 280);
+        }, 300);
       } else {
-        tasks = tasks.filter(t => t.id !== pendingDeleteId);
-        if (selectedId === pendingDeleteId) {
+        tasks = tasks.filter(t => t.id !== taskIdToDelete);
+        if (selectedId === taskIdToDelete) {
           selectedId = null;
         }
         saveTasks();

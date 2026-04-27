@@ -781,7 +781,7 @@ body {
   .app {
     padding: var(--spacing-md);
     max-width: 95%;
-    padding-bottom: 120px;
+    padding-bottom: var(--spacing-lg);
   }
 
   .footer {
@@ -1075,26 +1075,21 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
   animation: taskSlideIn 0.3s ease-out forwards;
 }
 
-/* Animação ao excluir tarefa */
+/* Animação ao excluir tarefa - simples fade + scale */
 @keyframes taskFadeOut {
   from {
     opacity: 1;
-    transform: scale(1);
-    max-height: 200px;
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
+    transform: scale(1) translateX(0);
   }
   to {
     opacity: 0;
-    transform: scale(0.95);
-    max-height: 0;
-    padding: 0;
-    margin-bottom: 0;
+    transform: scale(0.9) translateX(20px);
   }
 }
 
 .task-item-exit {
   animation: taskFadeOut 0.3s ease-out forwards;
+  pointer-events: none;
 }
 
 /* Bounce no checkbox */
