@@ -692,9 +692,34 @@ body {
   white-space: nowrap;
   cursor: help;
   transition: opacity 0.15s;
+  position: relative;
 }
 
 .footer-info:hover { opacity: 1; }
+
+.footer-info::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+  z-index: 100;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.footer-info:hover::after {
+  opacity: 1;
+}
 
 
 
