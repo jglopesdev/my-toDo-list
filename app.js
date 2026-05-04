@@ -6,9 +6,15 @@
   const IMAGE_QUALITY = 0.6;
   const IMAGE_PLACEHOLDER = 'Detalhe a tarefa relacionada a esta imagem...';
   const MAX_IMAGES_PER_TASK = 5;
-  const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB safety limit
+  const MAX_STORAGE_SIZE = 4 * 1024 * 1024;
+  const MAX_PROJECTS = 10;
+  const DEFAULT_PROJECT = { id: 'geral', name: 'Geral', color: '#bb86fc', icon: '📋' };
+  const PRESET_COLORS = ['#bb86fc', '#ff9800', '#4caf50', '#2196f3', '#f44336', '#9c27b0', '#00bcd4', '#ffeb3b'];
+  const PRESET_ICONS = ['📋', '💼', '🏠', '🎮', '📚', '🎨', '🏋️', '✈️', '💻', '🎵', '📝', '🔧'];
 
-let tasks = [];
+  let tasks = [];
+  let projects = [];
+  let activeProjectId = 'geral';
   let selectedId = null;
   let editingId = null;
   let currentFilter = null;
@@ -77,46 +83,43 @@ const elements = {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
-        tasks = tasks.map(t => ({
+        tasks = Array.isArray(parsed.tasks) ? parsed.tasks.map(t => ({
           ...t,
           priority: t.priority || 'none',
-          images: t.image ? [t.image] : (t.images || [])
-        }));
-
-        // Normalizar IDs legados (sem sufixo numérico)
-        tasks.forEach(t => {
-          if (!t.id.includes('-')) {
-            t.id = t.id + '-leg';
-          }
-        });
-
-        // Restaurar idCounter do maior sufixo numérico existente
-        tasks.forEach(t => {
-          const match = t.id.match(/-(\d+)$/);
-          if (match) {
-            const n = parseInt(match[1], 10);
-            if (n > idCounter) idCounter = n;
-          }
-        });
-
+          images: t.image ? [t.image] : (t.images || []),
+          projectId: t.projectId || 'geral'
+        })) : [];
+        projects = Array.isArray(parsed.projects) ? parsed.projects : [{ ...DEFAULT_PROJECT, createdAt: Date.now() }];
+        activeProjectId = parsed.activeProjectId || 'geral';
         selectedId = parsed.selectedId || null;
         currentFilter = parsed.currentFilter || null;
         idCounter = parsed.idCounter || 0;
       } else {
         tasks = [];
+        projects = [{ ...DEFAULT_PROJECT, createdAt: Date.now() }];
+        activeProjectId = 'geral';
       }
     } catch (e) {
       console.error('Erro ao carregar tarefas:', e);
       tasks = [];
+      projects = [{ ...DEFAULT_PROJECT, createdAt: Date.now() }];
+      activeProjectId = 'geral';
     }
+  }
+
+  function getActiveProject() {
+    return projects.find(p => p.id === activeProjectId) || projects[0];
+  }
+
+  function getProjectTasks() {
+    return tasks.filter(t => t.projectId === activeProjectId);
   }
 
   function saveTasks() {
     clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(() => {
       try {
-        const data = { tasks, selectedId, currentFilter, idCounter };
+        const data = { tasks, projects, activeProjectId, selectedId, currentFilter, idCounter };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         showSaveIndicator();
       } catch (e) {
@@ -129,7 +132,7 @@ const elements = {
   function saveTasksSync() {
     clearTimeout(saveDebounceTimer);
     try {
-      const data = { tasks, selectedId, currentFilter, idCounter };
+      const data = { tasks, projects, activeProjectId, selectedId, currentFilter, idCounter };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       showSaveIndicator();
       return true;
@@ -197,8 +200,9 @@ const elements = {
   }
 
   function updateProgressBar() {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.completed).length;
+    const projectTasks = getProjectTasks();
+    const total = projectTasks.length;
+    const completed = projectTasks.filter(t => t.completed).length;
     const pct = total === 0 ? 0 : Math.round(completed / total * 100);
     elements.progressFill.style.width = pct + '%';
     elements.progressText.textContent = total === 0 ? '' : `${completed}/${total}`;
@@ -248,14 +252,15 @@ const elements = {
   }
 
   function renderTasks() {
-    const totalCount = tasks.length;
-    const pendingCount = tasks.filter(t => !t.completed).length;
-    const completedCount = tasks.filter(t => t.completed).length;
-    const noneCount = tasks.filter(t => t.priority === 'none' && !t.completed).length;
-    const criticalCount = tasks.filter(t => t.priority === 'critical' && !t.completed).length;
-    const highCount = tasks.filter(t => t.priority === 'high' && !t.completed).length;
-    const mediumCount = tasks.filter(t => t.priority === 'medium' && !t.completed).length;
-    const lowCount = tasks.filter(t => t.priority === 'low' && !t.completed).length;
+    const projectTasks = getProjectTasks();
+    const totalCount = projectTasks.length;
+    const pendingCount = projectTasks.filter(t => !t.completed).length;
+    const completedCount = projectTasks.filter(t => t.completed).length;
+    const noneCount = projectTasks.filter(t => t.priority === 'none' && !t.completed).length;
+    const criticalCount = projectTasks.filter(t => t.priority === 'critical' && !t.completed).length;
+    const highCount = projectTasks.filter(t => t.priority === 'high' && !t.completed).length;
+    const mediumCount = projectTasks.filter(t => t.priority === 'medium' && !t.completed).length;
+    const lowCount = projectTasks.filter(t => t.priority === 'low' && !t.completed).length;
 
     elements.counterTotal.textContent = `${totalCount} tarefa${totalCount !== 1 ? 's' : ''}`;
     elements.counterPending.textContent = `${pendingCount} pendente${pendingCount !== 1 ? 's' : ''}`;
@@ -280,16 +285,16 @@ const elements = {
 
     elements.btnClearFilter.style.display = currentFilter ? 'inline-block' : 'none';
 
-    let filteredTasks = tasks;
+    let filteredTasks = projectTasks;
     if (currentFilter) {
       if (currentFilter === 'none') {
-        filteredTasks = tasks.filter(t => t.priority === 'none');
+        filteredTasks = projectTasks.filter(t => t.priority === 'none');
       } else if (currentFilter === 'pending') {
-        filteredTasks = tasks.filter(t => !t.completed);
+        filteredTasks = projectTasks.filter(t => !t.completed);
       } else if (currentFilter === 'completed') {
-        filteredTasks = tasks.filter(t => t.completed);
+        filteredTasks = projectTasks.filter(t => t.completed);
       } else {
-        filteredTasks = tasks.filter(t => t.priority === currentFilter);
+        filteredTasks = projectTasks.filter(t => t.priority === currentFilter);
       }
     }
 
@@ -318,9 +323,214 @@ const elements = {
     }
 
     elements.taskList.innerHTML = html;
+    renderProjectTabs();
     attachTaskEvents();
     attachSectionEvents();
     updateProgressBar();
+  }
+
+  function renderProjectTabs() {
+    const tabsContainer = document.getElementById('projectTabs');
+    if (!tabsContainer) return;
+    const active = getActiveProject();
+    const btnHtml = projects.length < MAX_PROJECTS ? '<button class="btn-add-project" id="btnAddProject" title="Novo projeto">+</button>' : '';
+    tabsContainer.innerHTML = projects.map(p => {
+      const isActive = p.id === activeProjectId;
+      const count = tasks.filter(t => t.projectId === p.id && !t.completed).length;
+      return `<div class="project-tab ${isActive ? 'active' : ''}" data-project-id="${p.id}" title="${p.name}">
+        <span>${p.icon}</span>
+        <span>${p.name}</span>
+        <span class="tab-count">${count}</span>
+      </div>`;
+    }).join('') + btnHtml;
+
+    // Remove old event listeners by replacing the container
+    const newTabs = tabsContainer.cloneNode(true);
+    tabsContainer.parentNode.replaceChild(newTabs, tabsContainer);
+
+    // Re-attach events
+    const activeTabs = document.getElementById('projectTabs');
+    document.querySelectorAll('.project-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchProject(tab.dataset.projectId));
+      tab.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openProjectMenu(e, tab.dataset.projectId);
+      });
+    });
+    const addBtn = document.getElementById('btnAddProject');
+    if (addBtn) addBtn.addEventListener('click', () => openProjectModal('create'));
+  }
+
+  function switchProject(projectId) {
+    if (projectId === activeProjectId) return;
+    activeProjectId = projectId;
+    selectedId = null;
+    editingId = null;
+    currentFilter = null;
+    saveTasksSync();
+    renderTasks();
+    const project = projects.find(p => p.id === projectId);
+    if (project) showToast(`${project.icon} ${project.name}`, 'info');
+  }
+
+  function createProject(name, color, icon) {
+    if (projects.length >= MAX_PROJECTS) {
+      showToast(`Máximo de ${MAX_PROJECTS} projetos`, 'warning');
+      return null;
+    }
+    const nameCmp = name.toLowerCase().trim();
+    if (projects.some(p => p.name.toLowerCase().trim() === nameCmp)) {
+      showToast('Já existe um projeto com este nome', 'warning');
+      return null;
+    }
+    const project = {
+      id: 'proj-' + Date.now(),
+      name: name.trim().substring(0, 20),
+      color: color || '#bb86fc',
+      icon: icon || '📋',
+      createdAt: Date.now()
+    };
+    projects.push(project);
+    activeProjectId = project.id;
+    saveTasksSync();
+    renderTasks();
+    showToast(`Projeto "${project.name}" criado!`, 'success');
+    return project;
+  }
+
+  function updateProject(projectId, updates) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    if (updates.name) {
+      const nameCmp = updates.name.toLowerCase().trim();
+      const name = updates.name.trim().substring(0, 20);
+      if (projects.some(p => p.id !== projectId && p.name.toLowerCase().trim() === nameCmp)) {
+        showToast('Já existe um projeto com este nome', 'warning');
+        return;
+      }
+      project.name = name;
+    }
+    if (updates.color) project.color = updates.color;
+    if (updates.icon) project.icon = updates.icon;
+    saveTasksSync();
+    renderTasks();
+  }
+
+  function deleteProject(projectId) {
+    if (projectId === 'geral') {
+      showToast('O projeto "Geral" não pode ser excluído', 'warning');
+      return;
+    }
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const taskCount = tasks.filter(t => t.projectId === projectId).length;
+    if (taskCount > 0) {
+      tasks.forEach(t => { if (t.projectId === projectId) t.projectId = 'geral'; });
+    }
+    projects = projects.filter(p => p.id !== projectId);
+    if (activeProjectId === projectId) {
+      activeProjectId = 'geral';
+      selectedId = null;
+      currentFilter = null;
+    }
+    saveTasksSync();
+    renderTasks();
+    showToast(`Projeto "${project.name}" excluído. ${taskCount > 0 ? taskCount + ' tarefas movidas para Geral.' : ''}`, 'warning');
+  }
+
+  function openProjectModal(mode, projectId) {
+    const modal = document.getElementById('projectModal');
+    const title = document.getElementById('projectModalTitle');
+    const input = document.getElementById('projectNameInput');
+    const confirmBtn = document.getElementById('projectModalConfirm');
+    if (!modal || !title || !input || !confirmBtn) return;
+    let selectedColor = '#bb86fc';
+    let selectedIcon = '📋';
+    if (mode === 'edit' && projectId) {
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        input.value = project.name;
+        selectedColor = project.color;
+        selectedIcon = project.icon;
+      }
+      title.textContent = 'Editar Projeto';
+      confirmBtn.textContent = 'Salvar';
+      confirmBtn.dataset.mode = 'edit';
+      confirmBtn.dataset.projectId = projectId;
+    } else {
+      input.value = '';
+      title.textContent = 'Novo Projeto';
+      confirmBtn.textContent = 'Criar';
+      confirmBtn.dataset.mode = 'create';
+      delete confirmBtn.dataset.projectId;
+    }
+    renderColorPicker(selectedColor);
+    renderIconPicker(selectedIcon);
+    modal.classList.add('visible');
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function closeProjectModal() {
+    document.getElementById('projectModal').classList.remove('visible');
+  }
+
+  function renderColorPicker(selected) {
+    const picker = document.getElementById('colorPicker');
+    if (!picker) return;
+    picker.innerHTML = PRESET_COLORS.map(c =>
+      `<div class="color-option ${c === selected ? 'selected' : ''}" style="background:${c}" data-color="${c}"></div>`
+    ).join('');
+    picker.querySelectorAll('.color-option').forEach(el => {
+      el.addEventListener('click', () => {
+        picker.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+    });
+  }
+
+  function renderIconPicker(selected) {
+    const picker = document.getElementById('iconPicker');
+    if (!picker) return;
+    picker.innerHTML = PRESET_ICONS.map(i =>
+      `<div class="icon-option ${i === selected ? 'selected' : ''}" data-icon="${i}">${i}</div>`
+    ).join('');
+    picker.querySelectorAll('.icon-option').forEach(el => {
+      el.addEventListener('click', () => {
+        picker.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+    });
+  }
+
+  function getSelectedColor() {
+    const sel = document.querySelector('#colorPicker .color-option.selected');
+    return sel ? sel.dataset.color : '#bb86fc';
+  }
+
+  function getSelectedIcon() {
+    const sel = document.querySelector('#iconPicker .icon-option.selected');
+    return sel ? sel.dataset.icon : '📋';
+  }
+
+  function openProjectMenu(e, projectId) {
+    if (projectId === 'geral') {
+      showToast('O projeto "Geral" não pode ser editado', 'info');
+      return;
+    }
+    const menu = document.getElementById('projectMenu');
+    if (!menu) return;
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    menu.dataset.projectId = projectId;
+    menu.classList.add('visible');
+    document.addEventListener('click', closeProjectMenu, { once: true });
+    document.addEventListener('contextmenu', closeProjectMenu, { once: true });
+    e.stopPropagation();
+  }
+
+  function closeProjectMenu() {
+    const menu = document.getElementById('projectMenu');
+    if (menu) menu.classList.remove('visible');
   }
 
   function sortTasksByPriority(taskList) {
@@ -626,7 +836,8 @@ const elements = {
       images: image ? [image] : [],
       priority: 'none',
       createdAt: Date.now(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      projectId: activeProjectId
     };
     tasks.unshift(task);
 
@@ -1211,6 +1422,55 @@ const elements = {
       });
     }
 
+    // Project modal
+    const projectModalCancel = document.getElementById('projectModalCancel');
+    const projectModalConfirm = document.getElementById('projectModalConfirm');
+    const projectModalName = document.getElementById('projectNameInput');
+    if (projectModalCancel) projectModalCancel.addEventListener('click', closeProjectModal);
+    if (projectModalConfirm) {
+      projectModalConfirm.addEventListener('click', () => {
+        const name = (projectModalName || {}).value?.trim();
+        if (!name) { showToast('Digite um nome para o projeto', 'warning'); return; }
+        const mode = projectModalConfirm.dataset.mode;
+        if (mode === 'edit' && projectModalConfirm.dataset.projectId) {
+          updateProject(projectModalConfirm.dataset.projectId, { 
+            name, color: getSelectedColor(), icon: getSelectedIcon() 
+          });
+        } else {
+          createProject(name, getSelectedColor(), getSelectedIcon());
+        }
+        closeProjectModal();
+      });
+    }
+    document.getElementById('projectModal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeProjectModal();
+    });
+
+    // Project context menu
+    const projectMenu = document.getElementById('projectMenu');
+    if (projectMenu) {
+      projectMenu.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        const projectId = projectMenu.dataset.projectId;
+        if (!projectId) return;
+        if (action === 'rename') {
+          closeProjectMenu();
+          openProjectModal('edit', projectId);
+        } else if (action === 'color') {
+          closeProjectMenu();
+          const c = PRESET_COLORS[(PRESET_COLORS.indexOf(getActiveProject().color) + 1) % PRESET_COLORS.length];
+          updateProject(projectId, { color: c });
+        } else if (action === 'icon') {
+          closeProjectMenu();
+          const i = PRESET_ICONS[(PRESET_ICONS.indexOf(getActiveProject().icon) + 1) % PRESET_ICONS.length];
+          updateProject(projectId, { icon: i });
+        } else if (action === 'delete') {
+          closeProjectMenu();
+          deleteProject(projectId);
+        }
+      });
+    }
+
     // Swipe to delete (mobile)
     let touchStartX = 0;
     let touchStartY = 0;
@@ -1328,7 +1588,7 @@ const elements = {
           clearInterval(deleteAllCountdownTimer);
           elements.confirmCountdown.classList.remove('visible');
           elements.confirmDeleteAllCancel.textContent = 'Cancelar';
-          tasks = [];
+          tasks = tasks.filter(t => t.projectId !== activeProjectId);
           selectedId = null;
           editingId = null;
           currentFilter = null;
@@ -1488,8 +1748,9 @@ function toggleSearchBar() {
       return;
     }
 
+    const projectTasks = getProjectTasks();
     const words = normalizedQuery.split(/\s+/);
-    const filtered = tasks.filter(task => {
+    const filtered = projectTasks.filter(task => {
       const text = task.text.toLowerCase();
       return words.every(word => text.includes(word));
     });

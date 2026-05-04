@@ -1741,3 +1741,211 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 .section-info:hover::after {
   opacity: 1;
 }
+
+/* ==================== PROJECT TABS ==================== */
+.project-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: var(--spacing-sm) 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.project-tabs::-webkit-scrollbar { display: none; }
+
+.project-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.project-tab:hover {
+  background: var(--surface-hover);
+}
+
+.project-tab.active {
+  background: rgba(187, 134, 252, 0.12);
+  border-color: var(--primary);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.project-tab .tab-count {
+  font-size: 0.7rem;
+  background: var(--bg);
+  padding: 1px 7px;
+  border-radius: 10px;
+  color: var(--text-muted);
+}
+
+.project-tab.active .tab-count {
+  background: var(--primary);
+  color: #121212;
+}
+
+.btn-add-project {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-add-project:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: rotate(90deg);
+}
+
+/* ==================== PROJECT MODAL ==================== */
+.project-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.project-modal.visible {
+  display: flex;
+  animation: modalFadeIn 0.25s ease forwards;
+}
+
+.project-modal-content {
+  background: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 380px;
+  box-shadow: var(--shadow);
+}
+
+.project-modal-content h3 {
+  color: var(--text);
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.1rem;
+}
+
+.project-name-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.project-name-input:focus {
+  border-color: var(--primary);
+}
+
+.picker-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: var(--spacing-sm) 0 var(--spacing-xs);
+}
+
+.color-picker, .icon-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform 0.15s;
+}
+
+.color-option:hover { transform: scale(1.2); }
+.color-option.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.icon-option {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 1.2rem;
+  background: var(--bg);
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.icon-option:hover { background: var(--surface-hover); transform: scale(1.1); }
+.icon-option.selected { border-color: var(--primary); }
+
+.project-modal-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin-top: var(--spacing-md);
+}
+
+/* ==================== PROJECT CONTEXT MENU ==================== */
+.project-menu {
+  display: none;
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 1002;
+  overflow: hidden;
+  min-width: 160px;
+}
+
+.project-menu.visible { display: block; }
+
+.project-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.project-menu button:hover { background: var(--surface-hover); }
+.project-menu button.danger { color: var(--danger); }
+.project-menu button.danger:hover { background: rgba(207, 102, 121, 0.15); }

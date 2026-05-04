@@ -15,6 +15,7 @@
         <span class="save-indicator" id="saveIndicator">Salvo ✓</span>
         <button class="theme-toggle" id="themeToggle" title="Alternar tema">☀️</button>
       </div>
+      <div class="project-tabs" id="projectTabs"></div>
       <div class="counters">
         <span class="counter counter-total" id="counterTotal">0 tarefas</span>
         <span class="counter counter-pending" id="counterPending">0 pendentes</span>
@@ -159,6 +160,28 @@
         <button class="btn-confirm btn-delete-confirm" id="confirmDeleteAllBtn" disabled>Excluir Todas</button>
       </div>
     </div>
+  </div>
+
+  <div class="project-modal" id="projectModal">
+    <div class="project-modal-content">
+      <h3 id="projectModalTitle">Novo Projeto</h3>
+      <input type="text" id="projectNameInput" class="project-name-input" placeholder="Nome do projeto..." maxlength="20">
+      <label class="picker-label">Cor</label>
+      <div class="color-picker" id="colorPicker"></div>
+      <label class="picker-label">Ícone</label>
+      <div class="icon-picker" id="iconPicker"></div>
+      <div class="project-modal-actions">
+        <button class="btn-confirm btn-cancel" id="projectModalCancel">Cancelar</button>
+        <button class="btn-confirm btn-delete-confirm" id="projectModalConfirm">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-menu" id="projectMenu">
+    <button data-action="rename">Renomear</button>
+    <button data-action="color">Alterar Cor</button>
+    <button data-action="icon">Alterar Ícone</button>
+    <button data-action="delete" class="danger">Excluir Projeto</button>
   </div>
 
   <script src="app.js"></script>
