@@ -338,7 +338,8 @@ const elements = {
     tabsContainer.innerHTML = projects.map(p => {
       const isActive = p.id === activeProjectId;
       const count = tasks.filter(t => t.projectId === p.id && !t.completed).length;
-      return `<div class="project-tab ${isActive ? 'active' : ''}" data-project-id="${p.id}" title="${p.name}">
+      const style = isActive && p.color ? `border-bottom-color:${p.color};background:${p.color}15` : '';
+      return `<div class="project-tab ${isActive ? 'active' : ''}" data-project-id="${p.id}" title="${p.name}" style="${style}">
         <span>${p.icon}</span>
         <span>${p.name}</span>
         <span class="tab-count">${count}</span>
@@ -1471,8 +1472,20 @@ const elements = {
           const project = projects.find(p => p.id === projectId);
           const taskCount = tasks.filter(t => t.projectId === projectId).length;
           pendingDeleteProjectId = projectId;
-          elements.confirmMessage.textContent = `Excluir "${project?.name}"?${taskCount > 0 ? ' ' + taskCount + ' tarefas serão movidas para Geral.' : ''}`;
-          elements.confirmModal.classList.add('visible');
+          if (taskCount > 0) {
+            elements.confirmDeleteAllMessage.textContent = `Excluir "${project?.name}"`;
+            document.querySelector('#confirmDeleteAllModal .confirm-text').textContent = `Este projeto tem ${taskCount} tarefa${taskCount !== 1 ? 's' : ''}. As tarefas serão movidas para "Geral".`;
+            document.querySelector('#confirmDeleteAllModal .confirm-warning').innerHTML = '<strong>Esta ação não pode ser desfeita. Recomendamos exportar em TXT para ter um backup.</strong>';
+            elements.confirmDeleteAllInput.value = '';
+            elements.confirmDeleteAllBtn.disabled = true;
+            elements.confirmCountdown.classList.remove('visible');
+            elements.confirmCountdown.textContent = '';
+            clearInterval(deleteAllCountdownTimer);
+            elements.confirmDeleteAllModal.classList.add('visible');
+          } else {
+            deleteProject(projectId);
+            pendingDeleteProjectId = null;
+          }
         }
       });
     }
@@ -1594,7 +1607,11 @@ const elements = {
           clearInterval(deleteAllCountdownTimer);
           elements.confirmCountdown.classList.remove('visible');
           elements.confirmDeleteAllCancel.textContent = 'Cancelar';
-          tasks = tasks.filter(t => t.projectId !== activeProjectId);
+          if (pendingDeleteProjectId) {
+            deleteProject(pendingDeleteProjectId);
+            pendingDeleteProjectId = null;
+            elements.confirmDeleteAllModal.classList.remove('visible');
+          } else {
           selectedId = null;
           editingId = null;
           currentFilter = null;
@@ -1610,6 +1627,7 @@ const elements = {
           renderTasks();
           elements.confirmDeleteAllModal.classList.remove('visible');
           showToast('Todas as tarefas foram excluídas!', 'warning');
+          }
         }
       }, 1000);
     });
@@ -1617,6 +1635,7 @@ const elements = {
       clearInterval(deleteAllCountdownTimer);
       elements.confirmCountdown.classList.remove('visible');
       elements.confirmDeleteAllCancel.textContent = 'Cancelar';
+      pendingDeleteProjectId = null;
       elements.confirmDeleteAllModal.classList.remove('visible');
     });
     elements.confirmDeleteAllModal.addEventListener('click', (e) => {
@@ -1624,6 +1643,7 @@ const elements = {
         clearInterval(deleteAllCountdownTimer);
         elements.confirmCountdown.classList.remove('visible');
         elements.confirmDeleteAllCancel.textContent = 'Cancelar';
+        pendingDeleteProjectId = null;
         elements.confirmDeleteAllModal.classList.remove('visible');
       }
     });
