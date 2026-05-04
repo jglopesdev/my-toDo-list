@@ -685,36 +685,16 @@ body {
 .sound-indicator.muted { opacity: 0.3; text-decoration: line-through; }
 
 .footer-info {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
-  opacity: 0.6;
+  opacity: 0.65;
   margin-right: 6px;
   white-space: nowrap;
+  cursor: help;
+  transition: opacity 0.15s;
 }
 
-.help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.help-btn:hover {
-  background: var(--primary);
-  color: #121212;
-  border-color: var(--primary);
-}
+.footer-info:hover { opacity: 1; }
 
 
 

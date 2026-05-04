@@ -1422,14 +1422,11 @@ const elements = {
     }
 
     // Help modal e Atalhos
-    const helpBtn = document.getElementById('helpBtn');
     const shortcutBtn = document.getElementById('btnShortcuts');
     const helpModal = document.getElementById('helpModal');
     const helpClose = document.getElementById('helpClose');
-    if (helpBtn && helpModal && helpClose) {
-      const openHelp = () => helpModal.classList.add('visible');
-      helpBtn.addEventListener('click', openHelp);
-      if (shortcutBtn) shortcutBtn.addEventListener('click', openHelp);
+    if (helpModal && helpClose) {
+      if (shortcutBtn) shortcutBtn.addEventListener('click', () => helpModal.classList.add('visible'));
       helpClose.addEventListener('click', () => helpModal.classList.remove('visible'));
       helpModal.addEventListener('click', (e) => {
         if (e.target === helpModal) helpModal.classList.remove('visible');
