@@ -1670,8 +1670,9 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 
 .help-body {
   padding: 0 var(--spacing-sm) var(--spacing-sm);
+  padding-left: 7.5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
   align-items: start;
 }
@@ -1684,7 +1685,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 
 .help-row {
   padding: 0 var(--spacing-sm);
-  grid-column: 1 / -1;
+  padding-left: 7.5rem;
   margin-bottom: 1rem;
 }
 
@@ -1692,6 +1693,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   background: transparent;
   border-radius: 0;
   padding: 0;
+  padding-left: 7.5rem;
 }
 
 .help-section-full h3 {
