@@ -1636,9 +1636,9 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 .help-content {
   background: var(--surface);
   border-radius: var(--radius);
-  max-width: 800px;
+  max-width: 900px;
   width: 96%;
-  height: 86vh;
+  height: 88vh;
   overflow-y: auto;
   position: relative;
   box-shadow: var(--shadow);
@@ -1674,7 +1674,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
-  max-width: 700px;
+  max-width: 800px;
   margin: 0 auto;
   align-items: start;
 }
