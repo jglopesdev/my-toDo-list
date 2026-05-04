@@ -267,7 +267,7 @@ const elements = {
     elements.counterTotal.textContent = `${totalCount} tarefa${totalCount !== 1 ? 's' : ''}`;
     elements.counterPending.textContent = `${pendingCount} pendente${pendingCount !== 1 ? 's' : ''}`;
     elements.counterCompleted.textContent = `${completedCount} concluída${completedCount !== 1 ? 's' : ''}`;
-    elements.counterNone.textContent = `${noneCount} sem priori.`;
+    elements.counterNone.textContent = `${noneCount} sem prioridade`;
     elements.counterCritical.textContent = `${criticalCount} crítica`;
     elements.counterHigh.textContent = `${highCount} alta`;
     elements.counterMedium.textContent = `${mediumCount} média`;
@@ -921,16 +921,18 @@ const elements = {
     let pendingCount = 0;
     let completedCount = 0;
 
-    let txt = '#|Status|Descrição|Prioridade\n';
-    txt += '---|------|----------|----------\n';
+    let txt = '#|Projeto|Status|Descrição|Prioridade\n';
+    txt += '---|-------|------|----------|----------\n';
 
     sortedTasks.forEach((task, index) => {
       const num = String(index + 1);
+      const project = projects.find(p => p.id === (task.projectId || 'geral'));
+      const projectName = (project ? project.name : 'Geral').replace(/\|/g, ' ');
       const status = statusLabels[task.completed];
       const priority = priorityLabels[task.priority] || '-';
       const desc = task.text.replace(/\|/g, ' ').replace(/\n/g, ' ');
 
-      txt += `${num}|${status}|${desc}|${priority}\n`;
+      txt += `${num}|${projectName}|${status}|${desc}|${priority}\n`;
 
       if (task.completed) {
         completedCount++;
@@ -1196,16 +1198,49 @@ const elements = {
     const statusMap = { 'Pendente': false, 'Concluída': true, 'Pendentes': false, 'Concluídas': true };
     const importedTasks = [];
 
+    // Detect format: new format has "Projeto" column in header (#|Projeto|Status|...)
+    let hasProjectColumn = false;
+    for (const line of lines) {
+      const t = line.trim();
+      if (t.startsWith('#|')) {
+        hasProjectColumn = t.toLowerCase().includes('projeto');
+        break;
+      }
+    }
+
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('═') || trimmed.startsWith('─') || trimmed.startsWith('Total:')) continue;
       if (trimmed.startsWith('#') || trimmed.startsWith('---')) continue;
 
-      let parts = trimmed.split('|');
-      if (parts.length >= 4) {
+      const parts = trimmed.split('|');
+
+      if (hasProjectColumn && parts.length >= 5) {
+        // New format: #|Projeto|Status|Descrição|Prioridade
+        const num = parts[0].trim();
+        const projectName = parts[1].trim();
+        const statusStr = parts[2].trim();
+        const desc = parts.slice(3, parts.length - 1).join('|').trim();
+        const priorStr = parts[parts.length - 1].trim();
+
+        if (num && !isNaN(parseInt(num))) {
+          const matched = projects.find(p => p.name.toLowerCase() === projectName.toLowerCase());
+          importedTasks.push({
+            id: generateId(),
+            text: desc,
+            completed: statusMap[statusStr] || false,
+            images: [],
+            priority: priorityMap[priorStr] || 'none',
+            projectId: matched ? matched.id : 'geral',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+        }
+      } else if (!hasProjectColumn && parts.length >= 4) {
+        // Old format: #|Status|Descrição|Prioridade — assign to active project
         const num = parts[0].trim();
         const statusStr = parts[1].trim();
-        let desc = parts.slice(2, parts.length - 1).join('|').trim();
+        const desc = parts.slice(2, parts.length - 1).join('|').trim();
         const priorStr = parts[parts.length - 1].trim();
 
         if (num && !isNaN(parseInt(num))) {
@@ -1215,6 +1250,7 @@ const elements = {
             completed: statusMap[statusStr] || false,
             images: [],
             priority: priorityMap[priorStr] || 'none',
+            projectId: activeProjectId || 'geral',
             createdAt: Date.now(),
             updatedAt: Date.now()
           });
