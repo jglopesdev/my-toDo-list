@@ -1682,6 +1682,28 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   gap: var(--spacing-md);
 }
 
+.help-row {
+  padding: 0 var(--spacing-sm);
+  grid-column: 1 / -1;
+}
+
+.help-section-full {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.shortcuts-grid ul {
+  list-style: none;
+  padding: 0;
+}
+
 .help-section {
   margin-bottom: 0;
 }
