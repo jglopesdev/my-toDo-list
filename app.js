@@ -71,6 +71,7 @@ const elements = {
   };
 
   let pendingDeleteId = null;
+  let pendingDeleteProjectId = null;
   let previousCounts = { total: 0, pending: 0, completed: 0 };
   let toastUndoCallback = null;
   let toastUndoTimer = null;
@@ -513,10 +514,6 @@ const elements = {
   }
 
   function openProjectMenu(e, projectId) {
-    if (projectId === 'geral') {
-      showToast('O projeto "Geral" não pode ser editado', 'info');
-      return;
-    }
     const menu = document.getElementById('projectMenu');
     if (!menu) return;
     menu.style.left = e.clientX + 'px';
@@ -1110,6 +1107,12 @@ const elements = {
   }
 
   function executeDelete() {
+    if (pendingDeleteProjectId) {
+      deleteProject(pendingDeleteProjectId);
+      pendingDeleteProjectId = null;
+      closeConfirmModal();
+      return;
+    }
     const taskIdToDelete = pendingDeleteId;
     const task = tasks.find(t => t.id === taskIdToDelete);
     const backupTask = task ? { ...task } : null;
@@ -1161,6 +1164,7 @@ const elements = {
   function closeConfirmModal() {
     elements.confirmModal.classList.remove('visible');
     pendingDeleteId = null;
+    pendingDeleteProjectId = null;
   }
 
   function importTasksFromTxt(event) {
@@ -1459,21 +1463,16 @@ const elements = {
       projectMenu.addEventListener('click', (e) => {
         const action = e.target.dataset.action;
         const projectId = projectMenu.dataset.projectId;
-        if (!projectId) return;
-        if (action === 'rename') {
-          closeProjectMenu();
+        if (!projectId || !action) return;
+        closeProjectMenu();
+        if (action === 'edit') {
           openProjectModal('edit', projectId);
-        } else if (action === 'color') {
-          closeProjectMenu();
-          const c = PRESET_COLORS[(PRESET_COLORS.indexOf(getActiveProject().color) + 1) % PRESET_COLORS.length];
-          updateProject(projectId, { color: c });
-        } else if (action === 'icon') {
-          closeProjectMenu();
-          const i = PRESET_ICONS[(PRESET_ICONS.indexOf(getActiveProject().icon) + 1) % PRESET_ICONS.length];
-          updateProject(projectId, { icon: i });
         } else if (action === 'delete') {
-          closeProjectMenu();
-          deleteProject(projectId);
+          const project = projects.find(p => p.id === projectId);
+          const taskCount = tasks.filter(t => t.projectId === projectId).length;
+          pendingDeleteProjectId = projectId;
+          elements.confirmMessage.textContent = `Excluir "${project?.name}"?${taskCount > 0 ? ' ' + taskCount + ' tarefas serão movidas para Geral.' : ''}`;
+          elements.confirmModal.classList.add('visible');
         }
       });
     }
