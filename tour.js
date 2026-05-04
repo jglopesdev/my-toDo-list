@@ -3,9 +3,10 @@
 
   const TOUR_KEY = 'todolist_tour_completed';
   const GAP = 14;
-  const TIP_W = 320;
+  const TIP_W = 360;
   const PAD = 6;
 
+  // Steps with demo:true will inject a fake task row so the element always exists
   const steps = [
     {
       target: '#taskInput',
@@ -26,25 +27,25 @@
       position: 'bottom'
     },
     {
-      target: '.task-priority-btn',
+      target: '[data-tour-demo] .task-priority',
       title: '⚡ Prioridades',
       text: 'Defina a prioridade de cada tarefa: <b>C</b>rítica, <b>A</b>lta, <b>M</b>édia, <b>B</b>aixa. A ordenação na lista é automática.',
-      position: 'left',
-      fallback: true
+      position: 'bottom',
+      demo: true
     },
     {
-      target: '.drag-handle',
+      target: '[data-tour-demo] .drag-handle',
       title: '↕️ Reordenar',
       text: 'Arraste o ícone <b>⋮⋮</b> para reordenar tarefas de <b>mesma prioridade</b>.',
       position: 'right',
-      fallback: true
+      demo: true
     },
     {
-      target: '.btn-copy',
+      target: '[data-tour-demo] .btn-copy',
       title: '📋 Copiar texto',
       text: 'Clique em <b>📋</b> para copiar o texto da tarefa. O ícone muda para ✅ como feedback.',
       position: 'left',
-      fallback: true
+      demo: true
     },
     {
       target: '.footer',
@@ -57,6 +58,52 @@
   let currentStep = 0;
   let overlay, tooltip, highlight;
   let firstShow = true;
+
+  // --- Demo task ---
+
+  function createDemoTask() {
+    if (document.querySelector('[data-tour-demo]')) return;
+    const taskList = document.getElementById('taskList');
+    if (!taskList) return;
+
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.classList.remove('visible');
+
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('data-tour-demo', 'true');
+    wrapper.style.cssText = 'padding: 0 0 8px;';
+    wrapper.innerHTML = `
+      <div class="task-item" style="pointer-events:none;cursor:default">
+        <span class="drag-handle" style="opacity:1;cursor:grab">⋮⋮</span>
+        <input type="checkbox" class="task-checkbox" disabled>
+        <div class="task-content">
+          <div class="task-text">Tarefa de exemplo</div>
+        </div>
+        <div class="task-priority" role="group" aria-label="Prioridade">
+          <button class="task-priority-btn priority-critical" disabled>C</button>
+          <button class="task-priority-btn priority-high active" disabled>A</button>
+          <button class="task-priority-btn priority-medium" disabled>M</button>
+          <button class="task-priority-btn priority-low" disabled>B</button>
+        </div>
+        <div class="task-actions" style="opacity:1">
+          <button class="btn btn-copy" disabled title="Copiar texto">📋</button>
+          <button class="btn btn-delete" disabled>&times;</button>
+        </div>
+      </div>`;
+    taskList.prepend(wrapper);
+  }
+
+  function removeDemoTask() {
+    const demo = document.querySelector('[data-tour-demo]');
+    if (demo) demo.remove();
+    const taskList = document.getElementById('taskList');
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState && taskList && !taskList.querySelector('.task-section')) {
+      emptyState.classList.add('visible');
+    }
+  }
+
+  // --- Tour engine ---
 
   function setup() {
     overlay = document.createElement('div');
@@ -140,6 +187,22 @@
 
   function showStep(index) {
     const step = steps[index];
+    const needsDemo = !!step.demo;
+    const hasDemo = !!document.querySelector('[data-tour-demo]');
+
+    if (needsDemo && !hasDemo) {
+      createDemoTask();
+      // Wait one frame for layout before measuring
+      requestAnimationFrame(function () { _applyStep(index); });
+      return;
+    }
+    if (!needsDemo && hasDemo) removeDemoTask();
+
+    _applyStep(index);
+  }
+
+  function _applyStep(index) {
+    const step = steps[index];
     tooltip.innerHTML = renderTooltip(index);
 
     const rect = getRect(step.target);
@@ -158,9 +221,11 @@
       highlight.style.height = (rect.height + PAD * 2) + 'px';
 
       const el = document.querySelector(step.target);
-      const r = el.getBoundingClientRect();
-      if (r.top < 60 || r.bottom > window.innerHeight - 50) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (el) {
+        const r = el.getBoundingClientRect();
+        if (r.top < 60 || r.bottom > window.innerHeight - 50) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
 
       positionTooltip(rect, step.position);
@@ -183,9 +248,7 @@
     else if (e.key === 'ArrowLeft') goTo(currentStep - 1);
   }
 
-  function onResize() {
-    showStep(currentStep);
-  }
+  function onResize() { _applyStep(currentStep); }
 
   function start() {
     if (!overlay) setup();
@@ -201,6 +264,7 @@
 
   function end() {
     if (!overlay) return;
+    removeDemoTask();
     overlay.style.display = 'none';
     highlight.style.display = 'none';
     tooltip.style.display = 'none';
