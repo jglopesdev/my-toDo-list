@@ -1702,11 +1702,19 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-sm);
+  text-align: center;
 }
 
 .shortcuts-grid ul {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shortcuts-grid ul li::before {
+  content: none;
 }
 
 .help-section {
