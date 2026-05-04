@@ -74,6 +74,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
 }
 
 .theme-toggle {
@@ -1794,9 +1796,10 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
   display: flex;
   gap: 4px;
   overflow-x: auto;
-  padding: var(--spacing-sm) 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .project-tabs::-webkit-scrollbar { display: none; }
@@ -1804,13 +1807,13 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 .project-tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1822,18 +1825,21 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 }
 
 .project-tab.active {
-  background: rgba(187, 134, 252, 0.12);
+  background: rgba(187, 134, 252, 0.15);
   border-color: var(--primary);
   color: var(--text);
   font-weight: 500;
 }
 
 .project-tab .tab-count {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   background: var(--bg);
-  padding: 1px 7px;
+  padding: 0px 6px;
   border-radius: 10px;
   color: var(--text-muted);
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.4;
 }
 
 .project-tab.active .tab-count {
@@ -1842,14 +1848,14 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 }
 
 .btn-add-project {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: transparent;
   border: 2px dashed var(--border);
   color: var(--text-muted);
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;

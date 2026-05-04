@@ -252,6 +252,7 @@ const elements = {
   }
 
   function renderTasks() {
+    renderProjectTabs();
     const projectTasks = getProjectTasks();
     const totalCount = projectTasks.length;
     const pendingCount = projectTasks.filter(t => !t.completed).length;
@@ -323,7 +324,6 @@ const elements = {
     }
 
     elements.taskList.innerHTML = html;
-    renderProjectTabs();
     attachTaskEvents();
     attachSectionEvents();
     updateProgressBar();
