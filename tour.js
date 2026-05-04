@@ -108,7 +108,6 @@
   function setup() {
     overlay = document.createElement('div');
     overlay.className = 'tour-overlay';
-    overlay.addEventListener('click', end);
 
     highlight = document.createElement('div');
     highlight.className = 'tour-highlight';
