@@ -517,6 +517,15 @@ body {
   color: var(--danger-hover);
 }
 
+.btn-copy {
+  font-size: 0.85rem;
+  padding: var(--spacing-xs) 4px;
+}
+
+.btn-copy:hover {
+  transform: scale(1.2);
+}
+
 .task-image {
   margin-top: var(--spacing-sm);
   border-radius: var(--radius-sm);

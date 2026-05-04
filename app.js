@@ -575,6 +575,7 @@ const elements = {
           </div>
           ${priorityButtons}
           <div class="task-actions">
+            <button class="btn btn-copy" data-task-id="${task.id}" title="Copiar texto" aria-label="Copiar texto">📋</button>
             <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir" aria-label="Excluir tarefa">&times;</button>
           </div>
         </div>
@@ -591,6 +592,7 @@ const elements = {
         </div>
         ${priorityButtons}
         <div class="task-actions">
+          <button class="btn btn-copy" data-task-id="${task.id}" title="Copiar texto" aria-label="Copiar texto">📋</button>
           <button class="btn btn-delete" data-task-id="${task.id}" title="Excluir" aria-label="Excluir tarefa">&times;</button>
         </div>
       </div>
@@ -697,6 +699,21 @@ const elements = {
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           confirmDeleteTask(taskId);
+        });
+      }
+
+      const copyBtn = item.querySelector('.btn-copy');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const task = tasks.find(t => t.id === taskId);
+          if (task) {
+            navigator.clipboard.writeText(task.text).then(() => {
+              copyBtn.textContent = '✅';
+              showToast('Texto copiado!', 'success');
+              setTimeout(() => { copyBtn.textContent = '📋'; }, 1000);
+            }).catch(() => showToast('Erro ao copiar', 'error'));
+          }
         });
       }
 
