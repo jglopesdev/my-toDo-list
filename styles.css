@@ -1698,7 +1698,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 
 .help-section-full h3 {
   text-align: center;
-  padding-bottom: var(--spacing-sm);
+  padding-bottom: 2rem !important;
 }
 
 .shortcuts-grid {
