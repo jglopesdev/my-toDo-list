@@ -1673,6 +1673,13 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--spacing-md);
+  align-items: start;
+}
+
+.help-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .help-section {
