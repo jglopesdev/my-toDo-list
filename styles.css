@@ -1664,7 +1664,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 
 .help-title {
   text-align: center;
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-sm) 2rem;
   font-size: 1.1rem;
   color: var(--text);
 }
@@ -1702,9 +1702,9 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 }
 
 .shortcuts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-xs);
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
   text-align: center;
 }
 
