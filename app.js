@@ -7,7 +7,7 @@
   const IMAGE_PLACEHOLDER = 'Detalhe a tarefa relacionada a esta imagem...';
   const MAX_IMAGES_PER_TASK = 5;
   const MAX_STORAGE_SIZE = 4 * 1024 * 1024;
-  const MAX_PROJECTS = 10;
+  const MAX_PROJECTS = 5;
   const DEFAULT_PROJECT = { id: 'geral', name: 'Geral', color: '#bb86fc', icon: '📋' };
   const PRESET_COLORS = ['#bb86fc', '#ff9800', '#4caf50', '#2196f3', '#f44336', '#9c27b0', '#00bcd4', '#ffeb3b'];
   const PRESET_ICONS = ['📋', '💼', '🏠', '🎮', '📚', '🎨', '🏋️', '✈️', '💻', '🎵', '📝', '🔧'];
