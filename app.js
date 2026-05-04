@@ -907,7 +907,7 @@ const elements = {
     }
 
     elements.btnExport.disabled = true;
-    elements.btnExport.textContent = 'Exportando...';
+    elements.btnExport.textContent = '⏳';
 
     const priorityLabels = { critical: 'CRÍTICA', high: 'ALTA', medium: 'MÉDIA', low: 'BAIXA', none: '-' };
     const priorityOrder = { critical: 1, high: 2, medium: 3, low: 4, none: 5 };
@@ -951,7 +951,7 @@ const elements = {
     URL.revokeObjectURL(url);
 
     elements.btnExport.disabled = false;
-    elements.btnExport.textContent = 'Exportar Tarefas (TXT)';
+    elements.btnExport.textContent = '⬇';
     showToast('Tarefas exportadas com sucesso!');
   }
 
@@ -1173,18 +1173,18 @@ const elements = {
     if (!file) return;
 
     elements.btnImport.disabled = true;
-    elements.btnImport.textContent = 'Importando...';
+    elements.btnImport.textContent = '⏳';
 
     const reader = new FileReader();
     reader.onload = function(e) {
       importFromContent(e.target.result, false);
       elements.btnImport.disabled = false;
-      elements.btnImport.textContent = 'Importar Tarefas (TXT)';
+      elements.btnImport.textContent = '⬆';
     };
     reader.onerror = function() {
       showToast('Erro ao ler arquivo', 'error');
       elements.btnImport.disabled = false;
-      elements.btnImport.textContent = 'Importar Tarefas (TXT)';
+      elements.btnImport.textContent = '⬆';
     };
     reader.readAsText(file);
     event.target.value = '';
@@ -1410,17 +1410,16 @@ const elements = {
     // Auto focus no campo de entrada
     elements.taskInput.focus();
 
-    // Som toggle no footer
-    const soundBtn = document.createElement('span');
-    soundBtn.className = 'sound-indicator';
-    soundBtn.innerHTML = '🔊 Som';
-    soundBtn.title = 'Alternar som';
-    soundBtn.addEventListener('click', () => {
-      isSoundEnabled = !isSoundEnabled;
-      soundBtn.classList.toggle('muted');
-      soundBtn.innerHTML = isSoundEnabled ? '🔊 Som' : '🔇 Som';
-    });
-    document.querySelector('.footer .shortcuts')?.appendChild(soundBtn);
+    // Som toggle
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+      soundToggle.addEventListener('click', () => {
+        isSoundEnabled = !isSoundEnabled;
+        soundToggle.classList.toggle('muted');
+        soundToggle.textContent = isSoundEnabled ? '🔊' : '🔇';
+        soundToggle.title = isSoundEnabled ? 'Alternar som' : 'Som desativado';
+      });
+    }
 
     // Help modal
     const helpBtn = document.getElementById('helpBtn');
@@ -1585,8 +1584,8 @@ const elements = {
       elements.confirmCountdown.textContent = '';
     });
 
-    // Ripple effect nos botões de exportar/importar
-    document.querySelectorAll('.btn-export, .btn-confirm').forEach(btn => {
+    // Ripple effect nos botões
+    document.querySelectorAll('.btn-icon, .btn-confirm').forEach(btn => {
       btn.addEventListener('click', createRipple);
     });
     elements.confirmDeleteAllInput.addEventListener('input', (e) => {

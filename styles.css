@@ -59,7 +59,7 @@ body {
   max-width: 90%;
   margin: 0 auto;
   padding: var(--spacing-lg);
-  padding-bottom: 140px;
+  padding-bottom: 60px;
 }
 
 .header {
@@ -599,89 +599,122 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  text-align: center;
-  padding: var(--spacing-md);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
   background: var(--bg);
   border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  align-items: center;
   z-index: 10;
+  gap: var(--spacing-sm);
 }
 
-.footer-top {
+.footer-left,
+.footer-right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-}
-
-.footer-logo-wrapper {
-  background: #1a1a21;
-  padding: 6px;
-  border-radius: 7px;
+  gap: 2px;
 }
 
 .footer-logo {
-  max-width: 60px;
-  max-height: 40px;
-  object-fit: contain;
-  border-radius: 4px;
-  display: block;
+  max-height: 22px;
+  border-radius: 3px;
+  margin-right: 6px;
+  opacity: 0.7;
 }
 
-.btn-export {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.btn-export + .btn-export {
-  margin-left: var(--spacing-sm);
-}
-
-.btn-export:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary);
-}
-
-.btn-export.btn-danger {
-  color: var(--danger);
-  border-color: var(--danger);
-}
-
-.btn-export.btn-danger:hover {
-  background: var(--danger);
-  color: #fff;
-}
-
-.footer small {
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-icon:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.btn-icon.btn-danger {
+  color: var(--danger);
+}
+
+.btn-icon.btn-danger:hover {
+  background: rgba(207, 102, 121, 0.15);
 }
 
 .shortcuts {
   display: flex;
-  gap: var(--spacing-md);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: var(--spacing-xs);
+  gap: 3px;
+  align-items: center;
+  margin-left: 6px;
 }
 
 .shortcuts kbd {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 3px;
-  padding: 2px 5px;
+  padding: 1px 4px;
   font-family: inherit;
-  font-size: 0.65rem;
-  margin-right: 2px;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.sound-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 4px;
+  transition: opacity 0.2s;
+}
+
+.sound-indicator:hover { opacity: 0.8; }
+.sound-indicator.muted { opacity: 0.3; text-decoration: line-through; }
+
+.footer-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: help;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+  margin-right: 4px;
+}
+
+.footer-info:hover { opacity: 1; }
+
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.help-btn:hover {
+  background: var(--primary);
+  color: #121212;
+  border-color: var(--primary);
 }
 
 
@@ -909,28 +942,17 @@ body {
   }
 
   .footer {
-    display: none;
+    height: 36px;
+    padding: 0 var(--spacing-sm);
   }
-
-  .footer-top {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--spacing-sm);
+  .footer-logo { display: none; }
+  .shortcuts { display: none; }
+  .footer-info { display: none; }
+  .btn-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
   }
-
-  .btn-export {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-  }
-
-  .shortcuts {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.65rem;
-  }
-
-  
 
   .search-input {
     padding: 10px 38px 10px 36px;
@@ -1111,7 +1133,7 @@ body {
 /* ==================== ANIMAÇÕES ==================== */
 
 /* Transição global para tema */
-body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text {
+body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -1270,13 +1292,13 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 }
 
 /* Botões com hover suave */
-.btn-export:hover,
+.btn-icon:hover,
 .btn-confirm:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.btn-export:active,
+.btn-icon:active,
 .btn-confirm:active {
   transform: translateY(0);
 }
@@ -1329,12 +1351,12 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
 }
 
 /* Ripple effect nos botões */
-.btn-export, .btn-confirm {
+.btn-icon, .btn-confirm {
   position: relative;
   overflow: hidden;
 }
 
-.btn-export .ripple,
+.btn-icon .ripple,
 .btn-confirm .ripple {
   position: absolute;
   border-radius: 50%;
@@ -1601,192 +1623,6 @@ body, .app, .task-item, .task-input, .counter, .footer, .btn-export, .task-text 
     transform: translateX(-120%);
     opacity: 0;
   }
-}
-
-/* ==================== NOTIFICAÇÃO SONORA (visual) ==================== */
-.sound-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  margin-left: var(--spacing-sm);
-  transition: opacity 0.2s;
-}
-
-.sound-indicator:hover {
-  opacity: 0.8;
-}
-
-.sound-indicator.muted {
-  opacity: 0.3;
-  text-decoration: line-through;
-}
-
-/* ==================== HELP BUTTON ==================== */
-.help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  line-height: 1;
-}
-
-.help-btn:hover {
-  background: var(--primary);
-  color: #121212;
-  border-color: var(--primary);
-}
-
-/* Help Modal */
-.help-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1001;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-md);
-}
-
-.help-modal.visible {
-  display: flex;
-  animation: modalFadeIn 0.25s ease forwards;
-}
-
-.help-content {
-  background: var(--surface);
-  border-radius: var(--radius);
-  max-width: 520px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: var(--shadow);
-}
-
-.help-close {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  line-height: 1;
-  transition: color 0.15s;
-  z-index: 1;
-}
-
-.help-close:hover {
-  color: var(--text);
-}
-
-.help-title {
-  text-align: center;
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
-  font-size: 1.3rem;
-}
-
-.help-body {
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
-}
-
-.help-section {
-  margin-bottom: var(--spacing-md);
-}
-
-.help-section h3 {
-  font-size: 0.95rem;
-  margin-bottom: var(--spacing-sm);
-  color: var(--text);
-}
-
-.help-section ul {
-  list-style: none;
-  padding: 0;
-}
-
-.help-section li {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  padding: 3px 0;
-  line-height: 1.5;
-}
-
-.help-section li::before {
-  content: "•";
-  margin-right: var(--spacing-sm);
-  color: var(--primary);
-}
-
-.help-section kbd {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 1px 5px;
-  font-family: inherit;
-  font-size: 0.75rem;
-}
-
-/* ==================== SECTION INFO ICON ==================== */
-.section-info {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 0.65rem;
-  cursor: help;
-  margin-left: auto;
-  position: relative;
-  transition: background 0.15s;
-}
-
-.section-info:hover {
-  background: var(--surface-hover);
-}
-
-.section-info::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  right: 0;
-  background: var(--surface);
-  color: var(--text);
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  z-index: 100;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  line-height: 1.5;
-  max-width: 300px;
-  white-space: normal;
-}
-
-.section-info:hover::after {
-  opacity: 1;
 }
 
 /* ==================== PROJECT TABS ==================== */
