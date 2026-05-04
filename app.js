@@ -563,6 +563,7 @@ const elements = {
     const shortText = isLongText ? linkedText.substring(0, maxLen) + '...' : linkedText;
     const textToRender = isLongText ? shortText : linkedText;
     const longTextId = 'long-' + task.id;
+    const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
 
     if (isEditing) {
       return `
