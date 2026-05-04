@@ -1421,12 +1421,15 @@ const elements = {
       });
     }
 
-    // Help modal
+    // Help modal e Atalhos
     const helpBtn = document.getElementById('helpBtn');
+    const shortcutBtn = document.getElementById('btnShortcuts');
     const helpModal = document.getElementById('helpModal');
     const helpClose = document.getElementById('helpClose');
     if (helpBtn && helpModal && helpClose) {
-      helpBtn.addEventListener('click', () => helpModal.classList.add('visible'));
+      const openHelp = () => helpModal.classList.add('visible');
+      helpBtn.addEventListener('click', openHelp);
+      if (shortcutBtn) shortcutBtn.addEventListener('click', openHelp);
       helpClose.addEventListener('click', () => helpModal.classList.remove('visible'));
       helpModal.addEventListener('click', (e) => {
         if (e.target === helpModal) helpModal.classList.remove('visible');

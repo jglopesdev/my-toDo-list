@@ -660,19 +660,8 @@ body {
 
 .footer-keys {
   display: flex;
-  gap: 4px;
   align-items: center;
   justify-self: center;
-}
-
-.footer-keys kbd {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 2px 5px;
-  font-family: inherit;
-  font-size: 0.6rem;
-  color: var(--text-muted);
 }
 
 .footer-utils {
@@ -696,15 +685,12 @@ body {
 .sound-indicator.muted { opacity: 0.3; text-decoration: line-through; }
 
 .footer-info {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  cursor: help;
-  opacity: 0.45;
-  transition: opacity 0.15s;
-  margin-right: 2px;
+  opacity: 0.6;
+  margin-right: 6px;
+  white-space: nowrap;
 }
-
-.footer-info:hover { opacity: 1; }
 
 .help-btn {
   display: inline-flex;
