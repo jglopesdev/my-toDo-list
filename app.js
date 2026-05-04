@@ -1726,6 +1726,12 @@ document.addEventListener('click', (e) => {
         navigateTasks(e.key === 'ArrowDown' ? 1 : -1);
       }
     });
+
+    const btnTour = document.getElementById('btnTour');
+    if (btnTour) btnTour.addEventListener('click', () => window.Tour && window.Tour.start());
+    if (window.Tour && window.Tour.isFirstVisit()) {
+      setTimeout(() => window.Tour.start(), 800);
+    }
   }
 
   function setFilter(filter) {
