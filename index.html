@@ -64,19 +64,20 @@
   </div>
 
   <footer class="footer">
-    <div class="footer-left">
+    <div class="footer-actions">
       <img src="jglopes.png" alt="Logo" class="footer-logo">
-      <button class="btn-icon" id="btnExport" title="Exportar tarefas em TXT">⬇</button>
-      <button class="btn-icon" id="btnImport" title="Importar tarefas de TXT">⬆</button>
-      <button class="btn-icon btn-danger" id="btnDeleteAll" title="Excluir todas as tarefas">🗑</button>
+      <button class="btn-footer" id="btnExport" title="Exportar tarefas em TXT">⬇ Exportar</button>
+      <button class="btn-footer" id="btnImport" title="Importar tarefas de TXT">⬆ Importar</button>
+      <div class="footer-divider"></div>
+      <button class="btn-footer btn-danger" id="btnDeleteAll" title="Excluir todas as tarefas">🗑 Excluir</button>
     </div>
-    <div class="footer-right">
+    <div class="footer-keys">
+      <kbd>INSERT</kbd><kbd>^B</kbd><kbd>DEL</kbd><kbd>↑↓</kbd>
+    </div>
+    <div class="footer-utils">
       <span class="footer-info" title="Suas tarefas são salvas automaticamente no navegador. Se limpar o cache, elas serão excluídas.">ⓘ</span>
       <span class="help-btn" id="helpBtn" title="Ajuda">?</span>
       <span class="sound-indicator" id="soundToggle" title="Alternar som">🔊</span>
-      <span class="shortcuts">
-        <kbd>INSERT</kbd><kbd>^B</kbd><kbd>DEL</kbd><kbd>↑↓</kbd>
-      </span>
     </div>
     <input type="file" id="fileImport" accept=".txt" style="display:none;">
   </footer>

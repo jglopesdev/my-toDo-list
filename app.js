@@ -951,7 +951,7 @@ const elements = {
     URL.revokeObjectURL(url);
 
     elements.btnExport.disabled = false;
-    elements.btnExport.textContent = '⬇';
+    elements.btnExport.textContent = '⬇ Exportar';
     showToast('Tarefas exportadas com sucesso!');
   }
 
@@ -1179,12 +1179,12 @@ const elements = {
     reader.onload = function(e) {
       importFromContent(e.target.result, false);
       elements.btnImport.disabled = false;
-      elements.btnImport.textContent = '⬆';
+      elements.btnImport.textContent = '⬆ Importar';
     };
     reader.onerror = function() {
       showToast('Erro ao ler arquivo', 'error');
       elements.btnImport.disabled = false;
-      elements.btnImport.textContent = '⬆';
+      elements.btnImport.textContent = '⬆ Importar';
     };
     reader.readAsText(file);
     event.target.value = '';
@@ -1585,7 +1585,7 @@ const elements = {
     });
 
     // Ripple effect nos botões
-    document.querySelectorAll('.btn-icon, .btn-confirm').forEach(btn => {
+    document.querySelectorAll('.btn-footer, .btn-confirm').forEach(btn => {
       btn.addEventListener('click', createRipple);
     });
     elements.confirmDeleteAllInput.addEventListener('input', (e) => {
