@@ -1673,7 +1673,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
-  max-width: 850px;
+  max-width: 950px;
   margin: 0 auto;
   align-items: start;
 }
@@ -1685,7 +1685,7 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 }
 
 .help-row {
-  max-width: 850px;
+  max-width: 950px;
   margin: 0 auto 1rem auto;
 }
 
