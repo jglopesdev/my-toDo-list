@@ -565,6 +565,33 @@ const elements = {
     const longTextId = 'long-' + task.id;
     const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
 
+    let imageHtml = '';
+    const taskSelected = task.id === selectedId;
+    const hasImages = task.images && task.images.length > 0;
+
+    if (hasImages || taskSelected) {
+      let images = '';
+      if (hasImages) {
+        images = task.images.map((img, idx) => `
+          <div class="task-image-wrapper">
+            <img class="task-image" data-task-id="${task.id}" data-image-index="${idx}" src="${img}" alt="Anexo ${idx + 1}">
+            <button class="btn-delete-image" data-task-id="${task.id}" data-image-index="${idx}" title="Excluir imagem" aria-label="Excluir imagem">&times;</button>
+          </div>
+        `).join('');
+      }
+      const addBtn = `<button type="button" class="btn-add-image" data-task-id="${task.id}" title="Adicionar imagem" aria-label="Adicionar imagem">+</button>`;
+      imageHtml = `<div class="task-images-container">${images}${addBtn}</div>`;
+    }
+
+    const priorityButtons = `
+      <div class="task-priority" data-task-id="${task.id}" role="group" aria-label="Prioridade">
+        <button class="task-priority-btn priority-critical ${task.priority === 'critical' ? 'active' : ''}" data-priority="critical" title="Crítica" aria-label="Definir prioridade crítica">C</button>
+        <button class="task-priority-btn priority-high ${task.priority === 'high' ? 'active' : ''}" data-priority="high" title="Alta" aria-label="Definir prioridade alta">A</button>
+        <button class="task-priority-btn priority-medium ${task.priority === 'medium' ? 'active' : ''}" data-priority="medium" title="Média" aria-label="Definir prioridade média">M</button>
+        <button class="task-priority-btn priority-low ${task.priority === 'low' ? 'active' : ''}" data-priority="low" title="Baixa" aria-label="Definir prioridade baixa">B</button>
+      </div>
+    `;
+
     if (isEditing) {
       return `
         <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
