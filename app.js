@@ -563,42 +563,11 @@ const elements = {
     const shortText = isLongText ? linkedText.substring(0, maxLen) + '...' : linkedText;
     const textToRender = isLongText ? shortText : linkedText;
     const longTextId = 'long-' + task.id;
-    const placeholderClass = isImageOnlyTask && !isEditing ? 'is-placeholder' : '';
-
-    let imageHtml = '';
-    const taskSelected = task.id === selectedId;
-    const hasImages = task.images && task.images.length > 0;
-    
-    if (hasImages || taskSelected) {
-      let images = '';
-      if (hasImages) {
-        images = task.images.map((img, idx) => `
-          <div class="task-image-wrapper">
-            <img class="task-image" data-task-id="${task.id}" data-image-index="${idx}" src="${img}" alt="Anexo ${idx + 1}">
-            <button class="btn-delete-image" data-task-id="${task.id}" data-image-index="${idx}" title="Excluir imagem" aria-label="Excluir imagem">&times;</button>
-          </div>
-        `).join('');
-      }
-      const addBtn = `<button type="button" class="btn-add-image" data-task-id="${task.id}" title="Adicionar imagem" aria-label="Adicionar imagem">+</button>`;
-      imageHtml = `<div class="task-images-container">${images}${addBtn}</div>`;
-    }
-
-    const priorityButtons = `
-      <div class="task-priority" data-task-id="${task.id}" role="group" aria-label="Prioridade">
-        <button class="task-priority-btn priority-critical ${task.priority === 'critical' ? 'active' : ''}" data-priority="critical" title="Crítica" aria-label="Definir prioridade crítica">C</button>
-        <button class="task-priority-btn priority-high ${task.priority === 'high' ? 'active' : ''}" data-priority="high" title="Alta" aria-label="Definir prioridade alta">A</button>
-        <button class="task-priority-btn priority-medium ${task.priority === 'medium' ? 'active' : ''}" data-priority="medium" title="Média" aria-label="Definir prioridade média">M</button>
-        <button class="task-priority-btn priority-low ${task.priority === 'low' ? 'active' : ''}" data-priority="low" title="Baixa" aria-label="Definir prioridade baixa">B</button>
-      </div>
-    `;
-
-    const hasPriority = task.priority !== 'none';
-    const dragHandleClass = hasPriority ? 'drag-handle hidden' : 'drag-handle';
 
     if (isEditing) {
       return `
         <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
-          <span class="${dragHandleClass}">⋮⋮</span>
+          <span class="drag-handle">⋮⋮</span>
           <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
           <div class="task-content">
             <textarea class="task-text-input" data-task-id="${task.id}">${escapeHtml(task.text)}</textarea>
@@ -614,7 +583,7 @@ const elements = {
 
     return `
       <div class="task-item ${task.id === selectedId ? 'selected' : ''} ${task.completed ? 'completed' : ''}" data-task-id="${task.id}" draggable="true">
-        <span class="${dragHandleClass}">⋮⋮</span>
+        <span class="drag-handle">⋮⋮</span>
         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
         <div class="task-content">
           <div class="task-text ${placeholderClass}" data-task-id="${task.id}">${isLongText ? `<span class="task-text-short" id="${longTextId}">${textToRender}</span><span class="task-text-full" id="${longTextId}-full" style="display:none">${linkedText}</span>` : textToRender}${isLongText ? '<button class="btn-expand" data-task-id="' + task.id + '">Ver mais</button>' : ''}</div>
@@ -652,7 +621,7 @@ const elements = {
   function renderTaskSection(title, sectionTasks, isCompleted) {
     const itemsHtml = sectionTasks.map(task => renderTaskItem(task)).join('');
     const collapsed = isCompleted ? 'collapsed' : '';
-    const infoIcon = !isCompleted ? '<span class="section-info" data-tip="📌 Tarefas com prioridade s\u00e3o ordenadas automaticamente.\n\u2195 Apenas tarefas sem prioridade podem ser reorganizadas manualmente." title="Ordena\u00e7\u00e3o">i</span>' : '';
+    const infoIcon = !isCompleted ? '<span class="section-info" data-tip="📌 Tarefas com prioridade s\u00e3o ordenadas automaticamente.\n\u2195 Arraste para reordenar entre tarefas de mesma prioridade." title="Ordena\u00e7\u00e3o">i</span>' : '';
     return `
       <div class="task-section ${collapsed}" data-completed="${isCompleted}">
         <div class="task-section-header">
@@ -786,11 +755,7 @@ const elements = {
 
       item.addEventListener('dragstart', (e) => {
         const task = tasks.find(t => t.id === taskId);
-        if (task && task.priority && task.priority !== 'none') {
-          e.preventDefault();
-          showToast('Reorganize apenas tarefas sem prioridade definida', 'warning');
-          return;
-        }
+        if (!task) return;
         item.classList.add('dragging');
         e.dataTransfer.setData('text/plain', taskId);
         e.dataTransfer.effectAllowed = 'move';
@@ -818,9 +783,10 @@ const elements = {
         const fromIndex = tasks.findIndex(t => t.id === draggedId);
         const toIndex = tasks.findIndex(t => t.id === taskId);
         if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+        const sourceTask = tasks[fromIndex];
         const targetTask = tasks[toIndex];
-        if (targetTask && targetTask.priority && targetTask.priority !== 'none') {
-          showToast('Não mova para posição de tarefa com prioridade', 'warning');
+        if (sourceTask.priority !== targetTask.priority) {
+          showToast('Só é possível reordenar entre tarefas de mesma prioridade', 'warning');
           return;
         }
         reorderTasks(fromIndex, toIndex);
@@ -981,12 +947,8 @@ const elements = {
   function reorderTasks(fromIndex, toIndex) {
     const taskToMove = tasks[fromIndex];
     const targetTask = tasks[toIndex];
-    if (taskToMove && taskToMove.priority && taskToMove.priority !== 'none') {
-      showToast('Reorganize apenas tarefas sem prioridade definida', 'warning');
-      return;
-    }
-    if (targetTask && targetTask.priority && targetTask.priority !== 'none') {
-      showToast('Não mova para posição de tarefa com prioridade', 'warning');
+    if (taskToMove.priority !== targetTask.priority) {
+      showToast('Só é possível reordenar entre tarefas de mesma prioridade', 'warning');
       return;
     }
     const [moved] = tasks.splice(fromIndex, 1);
