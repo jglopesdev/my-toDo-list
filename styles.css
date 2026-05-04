@@ -1637,9 +1637,9 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 .help-content {
   background: var(--surface);
   border-radius: var(--radius);
-  max-width: 720px;
-  width: 100%;
-  max-height: 85vh;
+  max-width: 1000px;
+  width: 95%;
+  max-height: 90vh;
   overflow-y: auto;
   position: relative;
   box-shadow: var(--shadow);
@@ -1664,16 +1664,33 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 
 .help-title {
   text-align: center;
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
-  font-size: 1.3rem;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+  font-size: 1.2rem;
   color: var(--text);
 }
 
 .help-body {
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  padding: 0 var(--spacing-md) var(--spacing-md);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+}
+
+.help-section {
+  margin-bottom: 0;
+}
+
+.help-section h3 {
+  font-size: 0.88rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text);
+}
+
+.help-section li {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 2px 0;
+  line-height: 1.5;
 }
 
 .help-section {
