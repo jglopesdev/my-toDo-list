@@ -1685,12 +1685,17 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 .help-row {
   padding: 0 var(--spacing-sm);
   grid-column: 1 / -1;
+  margin-bottom: 1rem;
 }
 
 .help-section-full {
-  background: var(--bg);
-  border-radius: var(--radius);
-  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+.help-section-full h3 {
+  text-align: center;
 }
 
 .shortcuts-grid {
