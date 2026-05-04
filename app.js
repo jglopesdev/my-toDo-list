@@ -1611,6 +1611,7 @@ const elements = {
             pendingDeleteProjectId = null;
             elements.confirmDeleteAllModal.classList.remove('visible');
           } else {
+          tasks = tasks.filter(t => t.projectId !== activeProjectId);
           selectedId = null;
           editingId = null;
           currentFilter = null;
