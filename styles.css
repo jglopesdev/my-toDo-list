@@ -1693,7 +1693,15 @@ body, .app, .task-item, .task-input, .counter, .footer, .task-text {
 .help-section-full {
   background: transparent;
   border-radius: 0;
-  padding: 0;
+  padding: 0 0 2rem 0;
+}
+
+.shortcuts-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
 .help-section-full h3 {
