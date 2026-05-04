@@ -6,6 +6,7 @@
   <title>Minha lista de tarefas</title>
   <link rel="icon" href="glass_logo.png" type="image/png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tour.css">
 </head>
 <body>
   <div class="app">
@@ -73,6 +74,8 @@
     </div>
     <div class="footer-keys">
       <button class="btn-footer" id="btnShortcuts" title="Ver dicas de uso">⌨ Dicas de uso</button>
+      <div class="footer-divider"></div>
+      <button class="btn-footer" id="btnTour" title="Ver tour guiado pela aplicação">🎓 Tour</button>
     </div>
     <div class="footer-utils">
       <span class="footer-info" id="footerInfo" data-tip="Exporte suas tarefas em TXT antes de limpar o cache para não perder os dados.">⚠ Dados podem ser perdidos ao limpar o cache</span>
@@ -199,6 +202,7 @@
     <button data-action="delete" class="danger">Excluir Projeto</button>
   </div>
 
+  <script src="tour.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
