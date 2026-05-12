@@ -201,7 +201,7 @@ const elements = {
   }
 
   function updateProgressBar() {
-    const projectTasks = getProjectTasks();
+    const projectTasks = tasks.filter(t => t.projectId === activeProjectId);
     const total = projectTasks.length;
     const completed = projectTasks.filter(t => t.completed).length;
     const pct = total === 0 ? 0 : Math.round(completed / total * 100);
